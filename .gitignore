@@ -7,6 +7,9 @@
 /public/bundles/
 /var/
 /vendor/
+/docker/db/data/
+/logs/nginx
+
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###
@@ -30,3 +33,5 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+
