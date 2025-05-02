@@ -19,6 +19,8 @@ services:
     container_name: talkLabs_php
     volumes:
       - ./:/var/www/html
+    depends_on:
+      - database
     networks:
       - networks_talkLabs
     environment:
@@ -26,6 +28,7 @@ services:
   
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    container_name: talkLabs_database
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -38,6 +41,8 @@ services:
     volumes:
       - database_data:/var/lib/postgresql/data:rw
       - ./docker/db/data:/var/lib/postgresql/data:rw
+    networks:
+      - networks_talkLabs
 
 volumes:
   database_data:

@@ -24,7 +24,7 @@ DROP TYPE IF EXISTS message_type CASCADE;
 DROP TYPE IF EXISTS conversation_status CASCADE;
 DROP TYPE IF EXISTS subscription_status CASCADE;
 DROP TYPE IF EXISTS payment_status CASCADE;
-
+DROP TYPE IF EXISTS report_status_enum CASCADE;
 
 CREATE TYPE message_status AS ENUM ('draft', 'published');
 CREATE TYPE message_sender AS ENUM ('user', 'interlocutor');
@@ -32,7 +32,7 @@ CREATE TYPE message_type AS ENUM ('text', 'image', 'video');
 CREATE TYPE conversation_status AS ENUM ('draft', 'published');
 CREATE TYPE subscription_status AS ENUM ('active', 'expired', 'canceled');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
-
+CREATE TYPE report_status_enum AS ENUM ('pending', 'resolved', 'rejected', 'in_progress', 'closed');
 
 CREATE TABLE accounts (
   id SERIAL PRIMARY KEY,
@@ -91,8 +91,8 @@ CREATE TABLE messages (
   sender message_sender NOT NULL,
   content JSON NOT NULL,
   type message_type NOT NULL,
-  image_url BYTEA NULL,
-  video_url BYTEA NULL,
+  image_url VARCHAR(255) NULL,
+  video_url VARCHAR(255) NULL,
   sent_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   template_id INT NOT NULL REFERENCES templates(id)
@@ -110,15 +110,13 @@ CREATE TABLE comments (
 CREATE TABLE favorites (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES accounts(id),
-  conversation_id INT NOT NULL REFERENCES conversations(id),
-  created_at TIMESTAMP NOT NULL
+  conversation_id INT NOT NULL REFERENCES conversations(id)
 );
 
 CREATE TABLE likes_publication (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES accounts(id),
-  conversation_id INT NOT NULL REFERENCES messages(id),
-  created_at TIMESTAMP NOT NULL
+  conversation_id INT NOT NULL REFERENCES messages(id)
 );
 
 CREATE TABLE payments (
@@ -155,13 +153,12 @@ CREATE TABLE notifications (
   created_at TIMESTAMP NOT NULL
 );
 
-
 CREATE TABLE topics (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES accounts(id),
   title VARCHAR(100) NOT NULL,
   content TEXT NOT NULL,
-  image_url BYTEA,
+  image_url VARCHAR(255),
   conversation_id INT NOT NULL REFERENCES conversations(id),
   created_at TIMESTAMP NOT NULL
 );
@@ -179,17 +176,25 @@ CREATE TABLE plans (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
-  features TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL
+  description TEXT NOT NULL
 );
 
 CREATE TABLE subscriptions (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES accounts(id),
   plan_id INT NOT NULL REFERENCES plans(id),
-  start_date TIMESTAMP NOT NULL,
-  end_date TIMESTAMP NOT NULL,
+  duration TIMESTAMP NOT NULL,
   status subscription_status NOT NULL
+);
+
+CREATE TABLE subscription_history (
+    id SERIAL PRIMARY KEY, 
+    start_at TIMESTAMP NOT NULL,
+    end_at TIMESTAMP NOT NULL, 
+    subscriber_id INT NOT NULL,
+    subscription_id INT NOT NULL,
+    CONSTRAINT fk_subscriber FOREIGN KEY (subscriber_id) REFERENCES accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_subscription FOREIGN KEY (subscription_id) REFERENCES subscriptions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE tags (
@@ -206,9 +211,8 @@ CREATE TABLE conversation_tags (
 CREATE TABLE reports (
   id SERIAL PRIMARY KEY,
   reported_by_user_id INT NOT NULL REFERENCES accounts(id),
-  target_type VARCHAR(20) NOT NULL,
-  target_id INT NOT NULL,
   reason TEXT NOT NULL,
-  status VARCHAR(20) NOT NULL,
-  created_at TIMESTAMP NOT NULL
+  status report_status_enum NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  conversation_id INT NOT NULL REFERENCES conversations(id)
 );
