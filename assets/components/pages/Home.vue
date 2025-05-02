@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import Card from './Card.vue'
+import Card from '../ui/Card.vue'
 
 export default {
   name: 'Home',

@@ -1,5 +1,5 @@
 <template>
-  <div class="register-page">
+   <div class="register-page">
     <a href="/" class="back-button">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="black"/>
@@ -8,9 +8,9 @@
     <div class="register-container">
       <!-- Partie gauche avec le logo -->
       <div class="logo-section">
-        <img src="../images/logo.svg" alt="TalkLabs Logo" class="logo" />
+        <img src="../../images/logo.svg" alt="TalkLabs Logo" class="logo" />
       </div>
-            <div class="separator"></div>
+      <div class="separator"></div>
 
       <!-- Partie droite avec le formulaire -->
       <div class="form-section">

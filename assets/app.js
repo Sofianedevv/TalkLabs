@@ -10,7 +10,7 @@
 import './styles/app.css';
 // ...
 import { createApp } from 'vue';
-import App from './components/App.vue';
+import App from './components/layout/App.vue';
 import router from './router';
 
 const app = createApp(App);

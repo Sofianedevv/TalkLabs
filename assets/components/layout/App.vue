@@ -14,11 +14,11 @@
 </template>
 
 <script>
-// Import des composants
+// Import des composants avec les bons chemins
 import Sidebar from './Sidebar.vue';
-import Home from './Home.vue';
-import Register from './Register.vue';
-import Login from './Login.vue';
+import Home from '../pages/Home.vue';
+import Register from '../auth/Register.vue';
+import Login from '../auth/Login.vue';
 
 export default {
   name: 'App',

@@ -69,8 +69,7 @@
 </template>
 
 <script>
-// Import du logo
-import logoUrl from '../images/logo.svg';
+import logoUrl from '../../images/logo.svg';
 
 export default {
   name: 'Sidebar',
