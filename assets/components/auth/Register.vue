@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     register() {
-      // Validation des champs
+      
       if (!this.username || !this.email || !this.confirmEmail || !this.password || !this.confirmPassword) {
         alert('Veuillez remplir tous les champs');
         return;
@@ -100,14 +100,14 @@ export default {
         return;
       }
       
-      // Logique d'inscription à implémenter
+     
       console.log('Inscription avec:', {
         username: this.username,
         email: this.email,
         password: this.password
       });
       
-      // Après une inscription réussie, rediriger vers la page d'accueil
+      
       if (this.$parent && this.$parent.navigate) {
         this.$parent.navigate('home');
       }
@@ -117,7 +117,7 @@ export default {
 </script>
 
 <style>
-/* Reset complet pour éliminer toutes les marges et rembourrages */
+
 * {
   margin: 0;
   padding: 0;
@@ -132,7 +132,7 @@ body, html {
   overflow: hidden !important;
   background-color: transparent !important;
 }
-/* Ajout du style pour la ligne de séparation */
+
 .separator {
   width: 1px !important;
   height: 100% !important;
@@ -162,7 +162,7 @@ body, html {
   display: block !important;
 }
 
-/* Suppression de toutes les marges et rembourrages potentiels */
+
 .app-container, .main-content, .sidebar {
   margin: 0 !important;
   padding: 0 !important;
@@ -171,7 +171,7 @@ body, html {
 
 
 <style scoped>
-/* Styles de base */
+
 .register-page {
   display: flex !important;
   width: 100vw !important;
@@ -206,14 +206,14 @@ body, html {
   padding: 0 !important;
 }
 
-/* Ajout du style spécifique pour le logo */
+
 .logo {
   width: 300px !important;
   height: 226.38px !important;
-  object-fit: contain !important; /* Assure que l'image conserve ses proportions */
+  object-fit: contain !important; 
 }
 
-/* Section droite avec le formulaire */
+
 .form-section {
   flex: 1 !important;
   background-color: white !important;
@@ -221,8 +221,8 @@ body, html {
   overflow-y: auto !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important; /* Changé de flex-start à center pour centrer verticalement */
-  padding: 0 !important; /* Supprimé le padding vertical */
+  justify-content: center !important; 
+  padding: 0 !important; 
 }
 
 .back-button {
@@ -237,11 +237,11 @@ body, html {
   max-width: 400px !important;
   width: 90% !important;
   margin: 0 auto !important;
-  padding: 60px 0 30px 0 !important; /* Déplacé le padding ici pour maintenir l'espace pour le bouton de retour */
-  position: relative !important; /* Ajouté pour s'assurer que le contenu reste dans les limites */
+  padding: 60px 0 30px 0 !important; 
+  position: relative !important; 
 }
 
-/* Réduire la taille des éléments pour qu'ils tiennent mieux */
+
 .title {
   font-size: 22px !important;
   font-weight: 600 !important;
@@ -305,7 +305,6 @@ body, html {
   margin-bottom: 20px !important;
 }
 
-/* Styles pour les écrans mobiles */
 @media (max-width: 992px) {
   .register-container {
     flex-direction: column !important;
@@ -313,26 +312,25 @@ body, html {
   
   .logo-section {
     flex: none !important;
-    height: 20vh !important; /* Réduit encore plus la hauteur du logo */
+    height: 20vh !important; 
   }
   
   .form-section {
     flex: none !important;
     height: 80vh !important;
-    justify-content: center !important; /* Assurez-vous que c'est toujours centré */
-    padding: 0 !important; /* Pas de padding sur la section */
+    justify-content: center !important; 
+    padding: 0 !important; 
   }
   
   .form-content {
-    padding: 50px 0 20px 0 !important; /* Ajusté le padding pour les petits écrans */
+    padding: 50px 0 20px 0 !important; 
   }
   .logo {
-    width: 300px !important; /* Taille réduite pour les écrans plus petits */
-    height: auto !important; /* Hauteur automatique pour conserver les proportions */
-    max-width: 90% !important; /* Limite à 90% de la largeur du conteneur */
+    width: 300px !important; 
+    height: auto !important; 
+    max-width: 90% !important; 
   }
   
-  /* Réduire encore plus les tailles et espacements */
   .title {
     font-size: 20px !important;
     margin-bottom: 5px !important;
@@ -373,25 +371,23 @@ body, html {
   }
 }
 
-/* Ajustements pour les très petits écrans */
 @media (max-height: 600px) {
   .logo-section {
-    height: 15vh !important; /* Réduit drastiquement la hauteur du logo */
+    height: 15vh !important; 
   }
   
  .form-section {
     height: 85vh !important;
-    justify-content: center !important; /* Assurez-vous que c'est toujours centré */
-    padding: 0 !important; /* Pas de padding sur la section */
+    justify-content: center !important; 
+    padding: 0 !important; 
   }
   .logo {
-    width: 200px !important; /* Taille encore plus réduite pour les très petits écrans */
+    width: 200px !important;
   }
   .form-content {
-    padding: 40px 0 10px 0 !important; /* Ajusté le padding pour les très petits écrans */
+    padding: 40px 0 10px 0 !important; 
   }
   
-  /* Réduire encore plus les tailles et espacements */
   .title {
     font-size: 18px !important;
     margin-bottom: 3px !important;

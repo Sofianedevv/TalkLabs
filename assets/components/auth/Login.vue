@@ -29,11 +29,9 @@ export default {
   },
   methods: {
     login() {
-      // Logique de connexion à implémenter
       console.log('Tentative de connexion avec:', this.email);
     },
     goToRegister() {
-      // Navigation vers la page d'inscription
       if (this.$parent && this.$parent.navigate) {
         this.$parent.navigate('register');
       }

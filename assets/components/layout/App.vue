@@ -1,9 +1,7 @@
 <template>
   <div>
-    <!-- Afficher uniquement Register lorsque currentPage est 'register' -->
     <Register v-if="currentPage === 'register'" />
     
-    <!-- Afficher la structure normale de l'application pour les autres pages -->
     <div v-else class="app-container" :class="{ 'sidebar-collapsed-content': isSidebarCollapsed }">
       <Sidebar v-if="currentPage === 'home'" @sidebar-toggle="handleSidebarToggle" />
       <main class="main-content">
@@ -14,7 +12,6 @@
 </template>
 
 <script>
-// Import des composants avec les bons chemins
 import Sidebar from './Sidebar.vue';
 import Home from '../pages/Home.vue';
 import Register from '../auth/Register.vue';
@@ -32,7 +29,7 @@ export default {
     return {
       message: 'TalkLabs',
       isSidebarCollapsed: false,
-      currentPage: 'home' // 'home', 'register', 'login', etc.
+      currentPage: 'home'
     }
   },
   computed: {
@@ -59,11 +56,9 @@ export default {
     }
   },
   mounted() {
-    // Vérifier si une page est définie dans la variable globale window.currentPage
     if (window.currentPage) {
       this.currentPage = window.currentPage;
     } else {
-      // Vérifier si l'URL contient un paramètre de page
       const urlParams = new URLSearchParams(window.location.search);
       const page = urlParams.get('page');
       if (page) {
@@ -81,32 +76,31 @@ export default {
   background-color: #11101A;
   color: white;
   font-family: Arial, sans-serif;
-  overflow: hidden; /* Empêche le défilement horizontal */
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .main-content {
   flex: 1;
   padding: 25px 30px;
-  overflow-y: auto; /* Permet de faire défiler le contenu principal si nécessaire */
-  height: 100vh; /* Utilise 100% de la hauteur de la fenêtre */
+  overflow-y: auto;
+  height: 100vh;
   position: relative;
   transition: margin-left 0.3s ease;
   display: flex;
-  justify-content: center; /* Centre horizontalement le contenu */
+  justify-content: center;
 }
 
 .main-content > * {
   width: 100%;
-  max-width: 1200px; /* Définit une largeur maximale pour le contenu */
-  margin: 0 auto; /* Centre le contenu si sa largeur est inférieure à max-width */
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .sidebar-collapsed-content {
-  margin-left: 80px; /* Ajustez cette valeur pour correspondre à la largeur de votre sidebar réduite */
+  margin-left: 80px;
 }
 
-/* Add button in bottom right */
 .add-button {
   position: fixed;
   bottom: 30px;
@@ -125,17 +119,15 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Ajout de marges aux boutons d'authentification */
 .auth-buttons {
-  margin: 0 15px; /* Ajoute une marge horizontale de 15px */
+  margin: 0 15px;
 }
 
 .auth-button {
-  margin: 0 8px; /* Ajoute un espacement entre les boutons */
-  padding: 8px 16px; /* Assure un bon padding interne */
+  margin: 0 8px;
+  padding: 8px 16px;
 }
 
-/* Pour les écrans plus petits, augmenter les marges */
 @media (max-width: 768px) {
   .auth-buttons {
     margin: 0 10px;
@@ -143,19 +135,18 @@ export default {
 }
 
 .header {
-  padding: 0 20px; /* Augmente le padding horizontal de l'en-tête */
+  padding: 0 20px;
 }
 
 .nav-buttons {
-  margin-right: 15px; /* Ajoute une marge à droite du conteneur de boutons */
+  margin-right: 15px;
 }
 
 .nav-button {
-  margin-left: 10px; /* Espace entre les boutons */
-  padding: 8px 16px; /* Padding interne confortable */
+  margin-left: 10px;
+  padding: 8px 16px;
 }
 
-/* Pour les écrans plus petits */
 @media (max-width: 768px) {
   .header {
     padding: 0 15px;

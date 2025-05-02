@@ -123,7 +123,7 @@ export default {
   right: 10px;
   cursor: pointer;
   z-index: 10;
-  background-color: rgba(26, 25, 44, 0.8); /* Fond semi-transparent */
+  background-color: rgba(26, 25, 44, 0.8); 
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -153,7 +153,7 @@ export default {
 }
 
 .logo {
-  margin-top: 40px; /* Ajouter une marge en haut pour éviter le chevauchement avec le bouton */
+  margin-top: 40px; 
   margin-bottom: 30px;
   display: flex;
   justify-content: center;
@@ -242,7 +242,7 @@ export default {
   color: #23CE6B;
 }
 
-/* Styles pour la version réduite de la sidebar */
+
 .sidebar-collapsed .auth-buttons {
   display: none;
 }
