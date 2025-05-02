@@ -28,7 +28,7 @@ DROP TYPE IF EXISTS payment_status CASCADE;
 
 CREATE TYPE message_status AS ENUM ('draft', 'published');
 CREATE TYPE message_sender AS ENUM ('user', 'interlocutor');
-CREATE TYPE message_type AS ENUM ('text', 'emoji', 'image', 'video');
+CREATE TYPE message_type AS ENUM ('text', 'image', 'video');
 CREATE TYPE conversation_status AS ENUM ('draft', 'published');
 CREATE TYPE subscription_status AS ENUM ('active', 'expired', 'canceled');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
@@ -44,8 +44,6 @@ CREATE TABLE accounts (
   bio TEXT NULL,
   role JSON NOT NULL,
   is_verified BOOLEAN NOT NULL DEFAULT FALSE,
-  is_banned BOOLEAN NOT NULL DEFAULT FALSE,
-  ban_reason TEXT NULL,
   reset_password_token VARCHAR(255) NULL,
   reset_token_expires_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL
@@ -68,7 +66,7 @@ CREATE TABLE templates (
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
   title VARCHAR(100) NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT NULL,
   category_id INT NOT NULL REFERENCES categories(id),
   creator_id INT NOT NULL REFERENCES accounts(id),
   created_at TIMESTAMP NOT NULL,
@@ -116,10 +114,10 @@ CREATE TABLE favorites (
   created_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE likes (
+CREATE TABLE likes_publication (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL REFERENCES accounts(id),
-  message_id INT NOT NULL REFERENCES messages(id),
+  conversation_id INT NOT NULL REFERENCES messages(id),
   created_at TIMESTAMP NOT NULL
 );
 
@@ -156,6 +154,7 @@ CREATE TABLE notifications (
   is_read BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL
 );
+
 
 CREATE TABLE topics (
   id SERIAL PRIMARY KEY,
