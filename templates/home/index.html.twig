@@ -1,9 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}Accueil - TalkLabs{% endblock %}
 
 {% block body %}
-    <h1>Bienvenue sur TALKLABS</h1>
-    
-    {# Le contenu Vue.js sera injecté dans la div#app qui est déjà dans base.html.twig #}
+    <div id="app"></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Définir la page actuelle comme 'home' pour que Vue.js affiche le bon composant
+        window.currentPage = 'home';
+    </script>
 {% endblock %} 

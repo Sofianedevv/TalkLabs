@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - TalkLabs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body, html {
+            background-color: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div id="app"></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Définir la page actuelle comme 'register' pour que Vue.js affiche le bon composant
+        window.currentPage = 'register';
+    </script>
+{% endblock %} 
