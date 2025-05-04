@@ -11,24 +11,16 @@ DROP TABLE IF EXISTS payments CASCADE;
 DROP TABLE IF EXISTS likes CASCADE;
 DROP TABLE IF EXISTS favorites CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
-DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS conversations CASCADE;
-DROP TABLE IF EXISTS templates CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
 DROP TABLE IF EXISTS accounts CASCADE;
 
-DROP TYPE IF EXISTS message_status CASCADE;
-DROP TYPE IF EXISTS message_sender CASCADE;
-DROP TYPE IF EXISTS message_type CASCADE;
 DROP TYPE IF EXISTS conversation_status CASCADE;
 DROP TYPE IF EXISTS subscription_status CASCADE;
 DROP TYPE IF EXISTS payment_status CASCADE;
 DROP TYPE IF EXISTS report_status_enum CASCADE;
 
-CREATE TYPE message_status AS ENUM ('draft', 'published');
-CREATE TYPE message_sender AS ENUM ('user', 'interlocutor');
-CREATE TYPE message_type AS ENUM ('text', 'image', 'video');
 CREATE TYPE conversation_status AS ENUM ('draft', 'published');
 CREATE TYPE subscription_status AS ENUM ('active', 'expired', 'canceled');
 CREATE TYPE payment_status AS ENUM ('pending', 'completed', 'failed');
@@ -55,13 +47,6 @@ CREATE TABLE categories (
   created_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE templates (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(50) NOT NULL,
-  type VARCHAR(50) NOT NULL,
-  content TEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL
-);
 
 CREATE TABLE conversations (
   id SERIAL PRIMARY KEY,
@@ -74,29 +59,9 @@ CREATE TABLE conversations (
   views INT NOT NULL DEFAULT 0,
   is_public BOOLEAN NOT NULL DEFAULT TRUE,
   status conversation_status NOT NULL,
-  interlocutor_name VARCHAR(50) NOT NULL,
-  interlocutor_username VARCHAR(30) NOT NULL,
-  interlocutor_avatar_url VARCHAR(255) NULL,
-  start_time TIMESTAMP NOT NULL,
-  battery_level INT NOT NULL,
-  network_type VARCHAR(10) NOT NULL,
-  signal_quality VARCHAR(10) NOT NULL,
-  template_id INT NOT NULL REFERENCES templates(id)
+  content JSON NOT NULL
 );
 
-CREATE TABLE messages (
-  id SERIAL PRIMARY KEY,
-  conversation_id INT NOT NULL REFERENCES conversations(id),
-  status message_status NOT NULL,
-  sender message_sender NOT NULL,
-  content JSON NOT NULL,
-  type message_type NOT NULL,
-  image_url VARCHAR(255) NULL,
-  video_url VARCHAR(255) NULL,
-  sent_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  template_id INT NOT NULL REFERENCES templates(id)
-);
 
 CREATE TABLE comments (
   id SERIAL PRIMARY KEY,
@@ -113,11 +78,6 @@ CREATE TABLE favorites (
   conversation_id INT NOT NULL REFERENCES conversations(id)
 );
 
-CREATE TABLE likes_publication (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL REFERENCES accounts(id),
-  conversation_id INT NOT NULL REFERENCES messages(id)
-);
 
 CREATE TABLE payments (
   id SERIAL PRIMARY KEY,

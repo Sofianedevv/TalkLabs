@@ -26,27 +26,6 @@ class Conversation
     #[ORM\Column]
     private ?bool $isPublic = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $interlocutorName = null;
-
-    #[ORM\Column(length: 30)]
-    private ?string $interlocutorUsername = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $interlocutorAvatarUrl = null;
-
-    #[ORM\Column]
-    private ?\DateTime $startAt = null;
-
-    #[ORM\Column]
-    private ?int $batteryLevel = null;
-
-    #[ORM\Column(length: 10)]
-    private ?string $networkType = null;
-
-    #[ORM\Column(length: 10)]
-    private ?string $signalQuality = null;
-
     #[ORM\Column(enumType: ConversationStatusEnum::class)]
     private ?ConversationStatusEnum $status = null;
 
@@ -89,6 +68,9 @@ class Conversation
      */
     #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'conversation')]
     private Collection $reports;
+
+    #[ORM\Column]
+    private array $content = [];
 
     public function __construct()
     {
@@ -136,90 +118,6 @@ class Conversation
     public function setIsPublic(bool $isPublic): static
     {
         $this->isPublic = $isPublic;
-
-        return $this;
-    }
-
-    public function getInterlocutorName(): ?string
-    {
-        return $this->interlocutorName;
-    }
-
-    public function setInterlocutorName(string $interlocutorName): static
-    {
-        $this->interlocutorName = $interlocutorName;
-
-        return $this;
-    }
-
-    public function getInterlocutorUsername(): ?string
-    {
-        return $this->interlocutorUsername;
-    }
-
-    public function setInterlocutorUsername(string $interlocutorUsername): static
-    {
-        $this->interlocutorUsername = $interlocutorUsername;
-
-        return $this;
-    }
-
-    public function getInterlocutorAvatarUrl(): ?string
-    {
-        return $this->interlocutorAvatarUrl;
-    }
-
-    public function setInterlocutorAvatarUrl(?string $interlocutorAvatarUrl): static
-    {
-        $this->interlocutorAvatarUrl = $interlocutorAvatarUrl;
-
-        return $this;
-    }
-
-    public function getStartAt(): ?\DateTime
-    {
-        return $this->startAt;
-    }
-
-    public function setStartAt(\DateTime $startAt): static
-    {
-        $this->startAt = $startAt;
-
-        return $this;
-    }
-
-    public function getBatteryLevel(): ?int
-    {
-        return $this->batteryLevel;
-    }
-
-    public function setBatteryLevel(int $batteryLevel): static
-    {
-        $this->batteryLevel = $batteryLevel;
-
-        return $this;
-    }
-
-    public function getNetworkType(): ?string
-    {
-        return $this->networkType;
-    }
-
-    public function setNetworkType(string $networkType): static
-    {
-        $this->networkType = $networkType;
-
-        return $this;
-    }
-
-    public function getSignalQuality(): ?string
-    {
-        return $this->signalQuality;
-    }
-
-    public function setSignalQuality(string $signalQuality): static
-    {
-        $this->signalQuality = $signalQuality;
 
         return $this;
     }
@@ -406,6 +304,18 @@ class Conversation
                 $report->setConversation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getContent(): array
+    {
+        return $this->content;
+    }
+
+    public function setContent(array $content): static
+    {
+        $this->content = $content;
 
         return $this;
     }
