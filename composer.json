@@ -11,6 +11,8 @@
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
+        "firebase/php-jwt": "^6.11",
+        "nelmio/cors-bundle": "^2.5",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^2.1",
         "symfony/asset": "7.2.*",
@@ -25,6 +27,7 @@
         "symfony/http-client": "7.2.*",
         "symfony/intl": "7.2.*",
         "symfony/mailer": "7.2.*",
+        "symfony/mercure-bundle": "^0.3.9",
         "symfony/mime": "7.2.*",
         "symfony/monolog-bundle": "^3.0",
         "symfony/notifier": "7.2.*",
@@ -98,6 +101,7 @@
         }
     },
     "require-dev": {
+        "hautelook/alice-bundle": "^2.15",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "7.2.*",
         "symfony/css-selector": "7.2.*",

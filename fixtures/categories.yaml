@@ -1,0 +1,4 @@
+App\Entity\Category:
+  category_1:
+    name: "Humour"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
