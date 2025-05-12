@@ -8,6 +8,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Enum\ConversationStatusEnum;
 use App\Repository\ConversationRepository;
+use App\Service\ConversationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -193,6 +194,21 @@ final class ConversationController extends AbstractController
         ];
 
         return $this->json($data, Response::HTTP_OK);
+    }
+
+    #[Route('/api/reset/conversation/{id}', name: 'app_reset_conversation', methods: ['PUT'])]
+    public function resetConversation(
+        $id,
+        ConversationService $conversationService,
+    )
+    {
+        try {
+            $conversationService->resetConversation($id);
+
+            return $this->json(['message' => 'Conversation réinitialisée avec succès'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Erreur lors de la réinitialisation de la conversation'], Response::HTTP_BAD_REQUEST);
+        }
     }
 
 }
