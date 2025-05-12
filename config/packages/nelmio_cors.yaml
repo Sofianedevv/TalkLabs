@@ -10,7 +10,4 @@ nelmio_cors:
       allow_origin: ['http://localhost:5173']
       allow_headers: ['Content-Type', 'Authorization']
       allow_methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE']
-    '^/.well-known/mercure':
-      allow_origin: ['http://localhost:5173']
-      allow_headers: ['Content-Type', 'Authorization']
-      allow_methods: ['GET', 'OPTIONS']
+
