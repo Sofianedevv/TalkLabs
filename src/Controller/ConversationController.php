@@ -6,15 +6,12 @@ use App\Entity\Conversation;
 use App\Repository\AccountsRepository;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 use App\Enum\ConversationStatusEnum;
 use App\Repository\ConversationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mercure\Hub;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class ConversationController extends AbstractController
@@ -25,7 +22,6 @@ final class ConversationController extends AbstractController
         EntityManagerInterface $em,
         CategoryRepository $categoryRepository,
         AccountsRepository $accountsRepository,
-        HubInterface $hub
     ): JsonResponse 
     {
         $data = json_decode($request->getContent(), true);
@@ -60,20 +56,7 @@ final class ConversationController extends AbstractController
 
         $em->persist($conversation);
         $em->flush();
-        $update = new Update(
-            'http://localhost:8081/conversations/' . $conversation->getId(), 
-            json_encode([
-                'id' => $conversation->getId(),
-                'title' => $conversation->getTitle(),
-                'description' => $conversation->getDescription(),
-                'status' => $conversation->getStatus()->value,
-                'content' => $conversation->getContent(),
-                'is_public' => $conversation->isPublic(),
-                'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
-                'updated_at' => $conversation->getUpdatedAt()->format('Y-m-d H:i:s'),
-            ])
-            );
-        $hub->publish($update);   
+
         return $this->json(['message' => 'Conversation créée avec succès'], Response::HTTP_CREATED);
     }
 
@@ -107,7 +90,6 @@ final class ConversationController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         ConversationRepository $conversationRepository,
-        HubInterface $hub,
         $id
     ): JsonResponse {
 
@@ -138,11 +120,6 @@ final class ConversationController extends AbstractController
 
         $em->flush();
 
-        $update = new Update(
-            'http://localhost:8081/conversations/' . $conversation->getId(), 
-            json_encode($messages)
-            );
-        $hub->publish($update);
         return $this->json(['message' => 'Message envoyé avec succès'], Response::HTTP_OK);
     }
 
@@ -151,7 +128,6 @@ final class ConversationController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         ConversationRepository $conversationRepository,
-        HubInterface $hub,
         $id
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
@@ -171,20 +147,6 @@ final class ConversationController extends AbstractController
         $conversation->setIsPublic($data['is_public'] ?? true);
         $conversation->setUpdatedAt(new \DateTimeImmutable());
         $em->flush();
-        $update = new Update(
-            'http://localhost:8081/conversations/' . $conversation->getId(), 
-            json_encode([
-                'id' => $conversation->getId(),
-                'title' => $conversation->getTitle(),
-                'description' => $conversation->getDescription(),
-                'status' => $conversation->getStatus()->value,
-                'content' => $conversation->getContent(),
-                'is_public' => $conversation->isPublic(),
-                'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
-                'updated_at' => $conversation->getUpdatedAt()->format('Y-m-d H:i:s'),
-            ])
-            );
-        $hub->publish($update);
         return $this->json(['message' => 'Conversation mise à jour avec succès'], Response::HTTP_OK);
     }
 
@@ -234,3 +196,5 @@ final class ConversationController extends AbstractController
     }
 
 }
+
+
