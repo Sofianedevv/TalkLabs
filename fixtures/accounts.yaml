@@ -1,0 +1,9 @@
+App\Entity\Accounts:
+  account_users:
+    name: 'Moussi sid-Ahmed'
+    email: 'moussi@gmail.com'
+    password: 'testpass'
+    role: ['ROLE_USER']
+    isVerified: true
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+    currentSubscription: '@subscription_1'
