@@ -6,21 +6,7 @@
 <div class="container my-5">
     <div class="jumbotron bg-light p-5 rounded">
         <h1 class="display-4">Bienvenue sur TalkLabs</h1>
-        <hr class="my-4">
-        
-        {% if app.user %}
-            <p>Vous êtes connecté en tant que {{ app.user.name }}.</p>
-            <div class="d-flex gap-2">
-                <a class="btn btn-primary" href="#">Mon profil</a>
-                <a class="btn btn-outline-danger" href="{{ path('app_logout') }}">Déconnexion</a>
-            </div>
-        {% else %}
-            <p>Connectez-vous ou inscrivez-vous pour participer aux discussions.</p>
-            <div class="d-flex gap-2">
-                <a class="btn btn-primary" href="{{ path('app_login') }}">Connexion</a>
-                <a class="btn btn-outline-primary" href="{{ path('app_register') }}">Inscription</a>
-            </div>
-        {% endif %}
+       
     </div>
 </div>
 {% endblock %} 
