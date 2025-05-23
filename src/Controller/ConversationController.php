@@ -35,7 +35,7 @@ final class ConversationController extends AbstractController
             return $this->json(['errors' => (string) $errors], 400);
         }
         try {
-            $service->createConversation($dto);
+           $service->createConversation($dto);
             return $this->json(['message' => 'Conversation créée avec succès'], 201);
         } catch (\RuntimeException $e) {
             return $this->json(['error' => $e->getMessage()], 400);
@@ -65,7 +65,7 @@ final class ConversationController extends AbstractController
         }
         try {
             $service->editMessage($id, $dto);
-            return $this->json(['message' => 'Conversation créée avec succès'], 201);
+            return $this->json(['message' => 'Conversation modifié avec succès'], 201);
         } catch (\RuntimeException $e) {
             return $this->json(['error' => $e->getMessage()], 400);
         }
@@ -99,21 +99,6 @@ final class ConversationController extends AbstractController
         }
 
     }
-
-    #[Route('/api/reset/conversation/{id}', name: 'app_reset_conversation', methods: ['PUT'])]
-    public function resetConversation(
-        $id,
-        ConversationService $conversationService,
-    )
-    {
-        try {
-            $conversationService->resetConversation($id);
-            return $this->json(['message' => 'Conversation réinitialisée avec succès'], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return $this->json(['error' => 'Erreur lors de la réinitialisation de la conversation'], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
 }
 
 

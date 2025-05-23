@@ -81,7 +81,7 @@ class ConversationService
         return $data;
     }
 
-    public function editMessage($id, ConversationDTO $dto,): Boolean
+    public function editMessage($id, ConversationDTO $dto): bool
     {
         $conversation = $this->conversationRepository->find($id);
 
