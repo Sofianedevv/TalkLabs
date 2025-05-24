@@ -3,12 +3,14 @@ FROM php:8.3.21RC1-fpm-bullseye
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
+    libsodium-dev \
     unzip \
     git \
     && docker-php-ext-install \
     pdo \
     pdo_pgsql \
-    zip
+    zip \
+    sodium
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
