@@ -20,13 +20,6 @@ class ConversationDTO
     #[Assert\Count(min: 1, minMessage: "Vous devez spécifier au moins un ID de catégorie.")]
     private array $categoriesId;
 
-    #[Assert\NotBlank(message: "L'ID du créateur ne peut pas être vide.")]
-    #[Assert\Type(
-        type: "integer",
-        message: "L'ID du créateur doit être un entier."
-    )]
-    private int $creatorId;
-
     #[Assert\NotBlank(message: "Le statut ne peut pas être vide.")]
     private string $status;
 
@@ -102,17 +95,6 @@ class ConversationDTO
     {
         $this->isPublic = $isPublic;
         return $this;
-    }
-
-    // Getter et Setter pour creatorId
-    public function getCreatorId(): int
-    {
-        return $this->creatorId;
-    }
-
-    public function setCreatorId(int $creatorId): void
-    {
-        $this->creatorId = $creatorId;
     }
 
     // Getter et Setter pour categoriesId

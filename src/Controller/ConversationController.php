@@ -19,9 +19,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/api', name: 'app_')]
 final class ConversationController extends AbstractController
 {
-    #[Route('/api/conversation', name: 'app_conversation', methods: ['POST'])]
+    #[Route('/conversation', name: 'conversation', methods: ['POST'])]
     public function createConversation(
         Request $request,
         SerializerInterface $serializer,
@@ -42,13 +43,13 @@ final class ConversationController extends AbstractController
         }
     }
 
-    #[Route('/api/conversations', name: 'app_get_conversation', methods: ['GET'])]
-    public function getConversations(ConversationService $service): JsonResponse
-    {
-        return $this->json($service->getAllConversations(), Response::HTTP_OK);
-    }
+    // #[Route('/conversations', name: 'get_conversation', methods: ['GET'])]
+    // public function getConversations(ConversationService $service): JsonResponse
+    // {
+    //     return $this->json($service->getAllConversations(), Response::HTTP_OK);
+    // }
 
-    #[Route('/api/update/conversation/{id}', name: 'app_update_conversation', methods: ['PUT'])]
+    #[Route('/update/conversation/{id}', name: 'update_conversation', methods: ['PUT'])]
     public function updateConversation(
         Request $request,
         SerializerInterface $serializer,
@@ -72,7 +73,7 @@ final class ConversationController extends AbstractController
     }
 
 
-    #[Route('/api/delete/conversation/{id}', name: 'app_delete_conversation', methods: ['DELETE'])]
+    #[Route('/delete/conversation/{id}', name: 'delete_conversation', methods: ['DELETE'])]
     public function deleteConversation(
         ConversationService $service,
         $id
@@ -87,7 +88,7 @@ final class ConversationController extends AbstractController
     }
     
 
-    #[Route('/api/conversation/{id}', name: 'app_get_conversation_by_id', methods: ['GET'])]
+    #[Route('/conversation/{id}', name: 'get_conversation_by_id', methods: ['GET'])]
     public function getConversationById(
         ConversationService $service,
         $id
@@ -99,5 +100,16 @@ final class ConversationController extends AbstractController
         }
 
     }
+
+    #[Route('/conversations', name: 'get_conversation_by_user', methods: ['GET'])]
+    public function getConversationByUser(ConversationService $service): JsonResponse {
+        try{
+            return $this->json($service->getConversationsByUser(), Response::HTTP_OK);
+        }catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+
+    }
+
 }
 

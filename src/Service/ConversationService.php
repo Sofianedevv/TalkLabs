@@ -6,6 +6,7 @@ use App\DTO\ConversationDTO;
 
 use App\DTO\ConversationEditDTO;
 use App\Entity\Conversation;
+use App\Entity\Accounts;
 use App\Enum\ConversationStatusEnum;
 use App\Mapper\ConversationMapper;
 use App\Repository\AccountsRepository;
@@ -13,6 +14,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\ConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Boolean;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Serializer;
@@ -27,7 +29,7 @@ class ConversationService
     private AccountsRepository $accountsRepository;
     private ConversationMapper $conversationMapper;
     private ConversationRepository $conversationRepository;
-
+    private Security $security;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -35,6 +37,7 @@ class ConversationService
         AccountsRepository     $accountsRepository,
         ConversationMapper     $conversationMapper,
         ConversationRepository $conversationRepository,
+        Security $security
     )
     {
         $this->em = $em;
@@ -42,22 +45,24 @@ class ConversationService
         $this->accountsRepository = $accountsRepository;
         $this->conversationMapper = $conversationMapper;
         $this->conversationRepository = $conversationRepository;
+        $this->security = $security;
     }
 
     public function createConversation(ConversationDTO $dto): void
     {
-        //Statique
-        $account = $this->accountsRepository->findOneBy(['email' => 'moussi@gmail.com']);
-        if (!$account) {
+        
+        $creator = $this->security->getUser();
+        if (!$creator) {
             throw new \RuntimeException('Utilisateur non trouvé');
         }
+        
         //Statique
         $category = $this->categoryRepository->findOneBy(['name' => "Humour"]);
         if (!$category) {
             throw new \RuntimeException('Catégorie non trouvée');
         }
 
-        $conversation = $this->conversationMapper->dtoToConversation($dto, $account, $category);
+        $conversation = $this->conversationMapper->dtoToConversation($dto, $creator, $category);
         $this->em->persist($conversation);
         $this->em->flush();
     }
@@ -88,17 +93,22 @@ class ConversationService
         if (!$conversation) {
             throw new NotFoundHttpException('Conversation non trouvée');
         }
-        //Statique
-        $account = $this->accountsRepository->findOneBy(['email' => 'moussi@gmail.com']);
-        if (!$account) {
+        
+        /** @var Accounts|null $creator */
+        $creator = $this->security->getUser();
+        if (!$creator) {
             throw new \RuntimeException('Utilisateur non trouvé');
         }
+        if ($conversation->getCreator()->getId() !== $creator->getId()) {
+            throw new \RuntimeException('Vous n\'êtes pas autorisé à modifier cette conversaiton');
+        }
+
         //Statique
         $category = $this->categoryRepository->findOneBy(['name' => "Humour"]);
         if (!$category) {
             throw new \RuntimeException('Catégorie non trouvée');
         }
-        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $account, $category);
+        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $category);
 
         $this->em->persist($conversation);
         $this->em->flush();
@@ -112,11 +122,20 @@ class ConversationService
             throw new \RuntimeException('Conversation non trouvée');
         }
 
+        /** @var Accounts|null $creator */
+        $creator = $this->security->getUser(); 
+        if (!$creator) {
+            throw new \RuntimeException('Utilisateur non trouvé');
+        }
+        if ($conversation->getCreator()->getId() !== $creator->getId()) {
+            throw new \RuntimeException('Vous n\'êtes pas autorisé à modifier cette conversaiton');
+        }
+
         $this->em->remove($conversation);
         $this->em->flush();
     }
 
-    public function getConversationById($id){
+    public function getConversationById($id) {
         /** @var Conversation|null $conversation */
         $conversation = $this->conversationRepository->find($id);
 
@@ -125,6 +144,31 @@ class ConversationService
         }
 
         return $this->conversationMapper->conversationToDTOConversation($conversation);
+    }
+
+    public function getConversationsByUser(): array {
+        /** @var Accounts|null $user */
+        $user = $this->security->getUser(); 
+        if (!$user) {
+            throw new \RuntimeException('Utilisateur non trouvé');
+        }
+
+        $conversations = $this->conversationRepository->findBy(['creator' => $user]);
+        $data = [];
+        foreach ($conversations as $conversation) {
+            $data[] = [
+                'id' => $conversation->getId(),
+                'title' => $conversation->getTitle(),
+                'description' => $conversation->getDescription(),
+                'status' => $conversation->getStatus()->value,
+                'content' => $conversation->getContent(),
+                'is_public' => $conversation->isPublic(),
+                'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updated_at' => $conversation->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }
+        return $data;
+
     }
 
 }

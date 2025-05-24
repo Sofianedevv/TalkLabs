@@ -38,7 +38,6 @@ class ConversationMapper
         $conversation->setTitle($dto->getTitle());
         $conversation->setDescription($dto->getDescription());
         $conversation->setContent($dto->getContent());
-        $conversation->setCreator($creator);
         $conversation->addCategory($category);
         $conversation->setStatus(ConversationStatusEnum::from($dto->getStatus()));
         $conversation->setIsPublic($dto->getIsPublic());
@@ -55,7 +54,6 @@ class ConversationMapper
         $conversationDTO->setStatus($conversation->getStatus()->value);
         $conversationDTO->setIsPublic($conversation->isPublic() );
         $conversationDTO->setCategoriesId([1] ); //TODO mettre la logique pour la gestion des id pour les categories
-        $conversationDTO->setCreatorId($conversation->getCreator()->getId());
         return $conversationDTO;
     }
 }

@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 
 #[Route('/api', name: 'api_')]
 class AuthController extends AbstractController
@@ -117,6 +118,15 @@ class AuthController extends AbstractController
             
             $token = $JWTManager->create($user);
             
+            //Si on passe le JWT via un cookie à voir
+            // $cookie = Cookie::create('BEARER')
+            //     ->withValue($token)
+            //     ->withExpires(new \DateTime('+1 hour'))
+            //     ->withPath('/')
+            //     ->withSecure(true)
+            //     ->withHttpOnly(true)
+            //     ->withSameSite('Strict');
+
             return $this->json([
                 'message' => 'Connexion réussie',
                 'token' => $token,
