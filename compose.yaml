@@ -24,26 +24,39 @@ services:
     networks:
       - networks_talkLabs
     environment:
-       DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: "postgresql://root:root@database:5432/app?serverVersion=16&charset=utf8"
   
   database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    image: postgres:16-alpine
     container_name: talkLabs_database
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_USER: root
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      test: ["CMD", "pg_isready", "-d", "app", "-U", "root"]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
-      - ./docker/db/data:/var/lib/postgresql/data:rw
     networks:
       - networks_talkLabs
-  
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: talkLabs_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      - networks_talkLabs
 
 volumes:
   database_data:
