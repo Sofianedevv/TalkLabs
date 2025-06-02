@@ -40,4 +40,13 @@ class ConversationRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findAllPublicConversations(): array {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.isPublic = :public')
+            ->setParameter('public', true)
+            ->orderBy('c.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }
