@@ -15,10 +15,14 @@ use App\Repository\ConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\File\UploadedFile as FileUploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 
 class ConversationService
@@ -30,6 +34,7 @@ class ConversationService
     private ConversationMapper $conversationMapper;
     private ConversationRepository $conversationRepository;
     private Security $security;
+    private SluggerInterface $slugger;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -37,7 +42,8 @@ class ConversationService
         AccountsRepository     $accountsRepository,
         ConversationMapper     $conversationMapper,
         ConversationRepository $conversationRepository,
-        Security $security
+        Security $security, 
+        SluggerInterface $slugger
     )
     {
         $this->em = $em;
@@ -46,6 +52,7 @@ class ConversationService
         $this->conversationMapper = $conversationMapper;
         $this->conversationRepository = $conversationRepository;
         $this->security = $security;
+        $this->slugger = $slugger;
     }
 
     public function createConversation(ConversationDTO $dto): void
@@ -169,6 +176,38 @@ class ConversationService
         }
         return $data;
 
+    }
+
+    public function uploadMedia(Request $request) : array {
+
+        $res = [];
+
+        $image = $request->files->get('image');
+        $audio = $request->files->get('audio');
+
+        $uploadDir = '/uploads';
+
+        if($image) {
+            $filename = $this->generateUniqueFilename($image);
+            $image->move(__DIR__ . '/../../public' . $uploadDir . '/images/', $filename);
+            $res['imageUrl'] = $uploadDir . '/images/' . $filename;
+        }
+
+        if($audio) {
+            $filename = $this->generateUniqueFilename($audio);
+            $audio->move(__DIR__ . '/../../public' . $uploadDir . '/audios/', $filename);
+            $res['audioUrl'] = $uploadDir . '/audios/' . $filename;
+        }
+
+        return $res;
+    }
+
+    private function generateUniqueFilename(UploadedFile $file) : string {
+        $initialFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $slugFilename = $this->slugger->slug($initialFilename);
+        $extension = $file->guessExtension();
+
+        return $slugFilename . '-' . uniqid() . '.' . $extension;
     }
 
 }

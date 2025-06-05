@@ -111,5 +111,11 @@ final class ConversationController extends AbstractController
 
     }
 
+    #[Route('/messages/upload', name: 'upload_media', methods: ['POST', 'OPTIONS'])]
+    public function upload(Request $request, ConversationService $service): JsonResponse
+    {
+        $result = $service->uploadMedia($request);
+        return new JsonResponse($result);
+    }
 }
 
