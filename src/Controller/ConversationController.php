@@ -43,11 +43,11 @@ final class ConversationController extends AbstractController
         }
     }
 
-    // #[Route('/conversations', name: 'get_conversation', methods: ['GET'])]
-    // public function getConversations(ConversationService $service): JsonResponse
-    // {
-    //     return $this->json($service->getAllConversations(), Response::HTTP_OK);
-    // }
+    #[Route('/conversations/public', name: 'get_public_conversation', methods: ['GET'])]
+    public function getConversations(ConversationService $service): JsonResponse
+    {
+        return $this->json($service->getAllPublicConversations(), Response::HTTP_OK);
+    }
 
     #[Route('/update/conversation/{id}', name: 'update_conversation', methods: ['PUT'])]
     public function updateConversation(

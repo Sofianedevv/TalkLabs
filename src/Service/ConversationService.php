@@ -74,9 +74,9 @@ class ConversationService
         $this->em->flush();
     }
 
-    public function getAllConversations(): array
+    public function getAllPublicConversations(): array
     {
-        $conversations = $this->conversationRepository->findAll();
+        $conversations = $this->conversationRepository->findAllPublicConversations();
         $data = [];
         foreach ($conversations as $conversation) {
             $data[] = [
@@ -87,7 +87,6 @@ class ConversationService
                 'content' => $conversation->getContent(),
                 'is_public' => $conversation->isPublic(),
                 'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
-                'updated_at' => $conversation->getUpdatedAt()->format('Y-m-d H:i:s'),
             ];
         }
         return $data;
