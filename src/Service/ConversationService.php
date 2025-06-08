@@ -8,6 +8,9 @@ use App\DTO\ConversationEditDTO;
 use App\Entity\Conversation;
 use App\Entity\Accounts;
 use App\Enum\ConversationStatusEnum;
+use App\Event\Conversation\ConversationCreatedEvent;
+use App\Event\Conversation\ConversationDeletedEvent;
+use App\Event\Conversation\ConversationEditedEvent;
 use App\Mapper\ConversationMapper;
 use App\Repository\AccountsRepository;
 use App\Repository\CategoryRepository;
@@ -23,7 +26,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
-
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ConversationService
 {
@@ -35,15 +38,17 @@ class ConversationService
     private ConversationRepository $conversationRepository;
     private Security $security;
     private SluggerInterface $slugger;
+    private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         EntityManagerInterface $em,
-        CategoryRepository     $categoryRepository,
-        AccountsRepository     $accountsRepository,
-        ConversationMapper     $conversationMapper,
+        CategoryRepository $categoryRepository,
+        AccountsRepository $accountsRepository,
+        ConversationMapper $conversationMapper,
         ConversationRepository $conversationRepository,
         Security $security, 
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        EventDispatcherInterface $eventDispatcher
     )
     {
         $this->em = $em;
@@ -53,6 +58,7 @@ class ConversationService
         $this->conversationRepository = $conversationRepository;
         $this->security = $security;
         $this->slugger = $slugger;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function createConversation(ConversationDTO $dto): void
@@ -72,6 +78,8 @@ class ConversationService
         $conversation = $this->conversationMapper->dtoToConversation($dto, $creator, $category);
         $this->em->persist($conversation);
         $this->em->flush();
+
+        $this->eventDispatcher->dispatch(new ConversationCreatedEvent($conversation), ConversationCreatedEvent::NAME);
     }
 
     public function getAllPublicConversations(): array
@@ -118,6 +126,9 @@ class ConversationService
 
         $this->em->persist($conversation);
         $this->em->flush();
+
+        $this->eventDispatcher->dispatch(new ConversationEditedEvent($conversation), ConversationEditedEvent::NAME);
+
         return true;
     }
 
@@ -137,8 +148,14 @@ class ConversationService
             throw new \RuntimeException('Vous n\'êtes pas autorisé à modifier cette conversaiton');
         }
 
+        $conversationForEvent = clone $conversation;
+
         $this->em->remove($conversation);
         $this->em->flush();
+
+        $this->eventDispatcher->dispatch(new ConversationDeletedEvent($conversationForEvent), ConversationDeletedEvent::NAME);
+        error_log('ConversationCreatedEvent dispatché');
+
     }
 
     public function getConversationById($id) {

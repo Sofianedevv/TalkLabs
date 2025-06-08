@@ -5,10 +5,13 @@ namespace App\Service;
 use App\Entity\Accounts;
 use App\Entity\Conversation;
 use App\Entity\Favorite;
+use App\Event\Favorite\FavoriteCreatedEvent;
+use App\Event\Favorite\FavoriteDeletedEvent;
 use App\Repository\ConversationRepository;
 use App\Repository\FavoriteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class FavoriteService {
 
@@ -16,13 +19,15 @@ class FavoriteService {
     private ConversationRepository $conversationRepository;
     private FavoriteRepository $favoriteRepository;
     private Security $security;
+    private EventDispatcherInterface $eventDispatcher;
 
-    public function __construct(EntityManagerInterface $em, ConversationRepository $conversationRepository, FavoriteRepository $favoriteRepository,Security $security)
+    public function __construct(EntityManagerInterface $em, ConversationRepository $conversationRepository, FavoriteRepository $favoriteRepository,Security $security, EventDispatcherInterface $eventDispatcher)
     {
         $this->em = $em;
         $this->conversationRepository = $conversationRepository;
         $this->favoriteRepository = $favoriteRepository;
         $this->security = $security;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function addConversationToFavorite(int $conversationId): void {
@@ -50,6 +55,8 @@ class FavoriteService {
             $favorite->addConversation($conversation);
             $this->em->persist($favorite);
             $this->em->flush();
+
+            $this->eventDispatcher->dispatch(new FavoriteCreatedEvent($favorite, $conversation), FavoriteCreatedEvent::NAME);
         }
     }
 
@@ -73,6 +80,8 @@ class FavoriteService {
             $favorite->removeConversation($conversation);
             $this->em->persist($favorite);
             $this->em->flush();
+
+            $this->eventDispatcher->dispatch(new FavoriteDeletedEvent($favorite, $conversation), FavoriteDeletedEvent::NAME);
         }
     }
 
