@@ -4,7 +4,10 @@ namespace App\Controller\Api;
 
 use App\Entity\Accounts;
 use App\Repository\AccountsRepository;
+use App\Repository\RefreshTokenRepository;
+use App\Service\RefreshTokenService;
 use Doctrine\ORM\EntityManagerInterface;
+use Dom\Entity;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +19,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api', name: 'api_')]
 class AuthController extends AbstractController
@@ -88,7 +92,8 @@ class AuthController extends AbstractController
         AccountsRepository $accountsRepository,
         UserPasswordHasherInterface $passwordHasher,
         JWTTokenManagerInterface $JWTManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        RefreshTokenService $refreshTokenService
     ): JsonResponse {
         if ($request->getMethod() === 'OPTIONS') {
             return new JsonResponse([], Response::HTTP_OK);
@@ -127,9 +132,13 @@ class AuthController extends AbstractController
             //     ->withHttpOnly(true)
             //     ->withSameSite('Strict');
 
+
+            $refreshToken = $refreshTokenService->createRefreshToken($user);
+
             return $this->json([
                 'message' => 'Connexion réussie',
                 'token' => $token,
+                'refresh_token' => $refreshToken->getRefreshToken(),
                 'user' => [
                     'id' => $user->getId(),
                     'name' => $user->getName(),
@@ -193,5 +202,51 @@ class AuthController extends AbstractController
             'message' => 'API is working',
             'timestamp' => (new \DateTime())->format('Y-m-d H:i:s')
         ]);
+    }
+
+
+    #[Route('/refresh-token', name: 'refresh_token', methods: ['POST'])]
+    public function refreshToken(
+        Request $request,
+        RefreshTokenRepository $refreshTokenRepository,
+        JWTTokenManagerInterface $JWTManager,
+        AccountsRepository $accountsRepository,
+        EntityManagerInterface $entityManager,
+    ) : JsonResponse {
+        
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['refresh_token'])) {
+            return $this->json(['message' => 'Refresh token manquant'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $refreshToken = $refreshTokenRepository->findOneBy(['refresh_token' => $data['refresh_token']]);
+        
+        if (!$refreshToken ) {
+            return $this->json(['message' => 'Refresh token invalide'], Response::HTTP_UNAUTHORIZED);
+        }
+        
+        if($refreshToken->isRevoked() || $refreshToken->getExpiresAt() < new \DateTimeImmutable()) {
+            return $this->json(['message' => 'Refresh token expiré ou révoqué'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user = $refreshToken->getAccount();
+        if (!$user) {
+            return $this->json(['message' => 'Utilisateur non trouvé'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $refreshToken->setIsRevoked(true);
+        $entityManager->persist($refreshToken);
+
+        $newRefreshToken = $refreshTokenRepository->createRefreshToken($user);
+        $newJwt = $JWTManager->create($user);
+
+        $entityManager->flush();
+        return $this->json([
+            'token' => $newJwt,
+            'refresh_token' => $newRefreshToken->getRefreshToken(),
+
+        ]);
+
+
     }
 } 

@@ -99,6 +99,12 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'reportedByUser')]
     private Collection $reports;
 
+    /**
+     * @var Collection<int, RefreshToken>
+     */
+    #[ORM\OneToMany(targetEntity: RefreshToken::class, mappedBy: 'account')]
+    private Collection $refreshTokens;
+
     public function __construct()
     {
         $this->conversations = new ArrayCollection();
@@ -108,6 +114,7 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
         $this->contacts = new ArrayCollection();
         $this->notifications = new ArrayCollection();
         $this->reports = new ArrayCollection();
+        $this->refreshTokens = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -493,5 +500,35 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
+    }
+
+    /**
+     * @return Collection<int, RefreshToken>
+     */
+    public function getRefreshTokens(): Collection
+    {
+        return $this->refreshTokens;
+    }
+
+    public function addRefreshToken(RefreshToken $refreshToken): static
+    {
+        if (!$this->refreshTokens->contains($refreshToken)) {
+            $this->refreshTokens->add($refreshToken);
+            $refreshToken->setAccount($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRefreshToken(RefreshToken $refreshToken): static
+    {
+        if ($this->refreshTokens->removeElement($refreshToken)) {
+            // set the owning side to null (unless already changed)
+            if ($refreshToken->getAccount() === $this) {
+                $refreshToken->setAccount(null);
+            }
+        }
+
+        return $this;
     }
 }
