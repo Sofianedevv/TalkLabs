@@ -16,7 +16,7 @@ security:
             security: false
         
         login:
-            pattern: ^/api/(login|register|test|test-token|me)
+            pattern: ^/api/(login|register|test|test-token)
             stateless: true
             security: false
             
@@ -51,7 +51,6 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/test, roles: PUBLIC_ACCESS }
         - { path: ^/api/test-token, roles: PUBLIC_ACCESS }
-        - { path: ^/api/me, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/profile, roles: ROLE_USER }
