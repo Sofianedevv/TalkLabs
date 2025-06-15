@@ -179,7 +179,8 @@ class AuthController extends AbstractController
                     'id' => $user->getId(),
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
-                    'username' => $user->getUsername()
+                    'username' => $user->getUsername(),
+                    'avatarUrl' => $user->getAvatarUrl()
                 ]
             ]);
         } catch (\Exception $e) {
