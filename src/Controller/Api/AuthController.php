@@ -128,7 +128,7 @@ class AuthController extends AbstractController
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
-                ->withExpires(new \DateTime('+1 hour'))
+                ->withExpires(new \DateTime('+1 minutes'))
                 ->withPath('/')
                 ->withSecure(false)
                 ->withHttpOnly(true)
@@ -195,72 +195,6 @@ class AuthController extends AbstractController
             'message' => 'API is working',
             'timestamp' => (new \DateTime())->format('Y-m-d H:i:s')
         ]);
-    }
-
-
-    #[Route('/refresh-token', name: 'refresh_token', methods: ['POST'])]
-    public function refreshToken(
-        Request $request,
-        RefreshTokenRepository $refreshTokenRepository,
-        RefreshTokenService $refreshTokenService,
-        JWTTokenManagerInterface $JWTManager,
-        AccountsRepository $accountsRepository,
-        EntityManagerInterface $entityManager,
-    ) : JsonResponse {
-        
-        $tokenValue = $request->cookies->get('REFRESH_TOKEN');
-
-     if (!$tokenValue) {
-        $response = $this->json(['message' => 'Refresh token manquant'], Response::HTTP_UNAUTHORIZED);
-        $response->headers->clearCookie('BEARER');
-        $response->headers->clearCookie('REFRESH_TOKEN');
-        return $response;
-    }
-
-        $refreshToken = $refreshTokenRepository->findOneBy(['refreshToken' => $tokenValue]);
-        
-        
-        if($refreshToken->isRevoked() || $refreshToken->getExpiresAt() < new \DateTimeImmutable()) {
-        $response = $this->json(['message' => 'Refresh token manquant'], Response::HTTP_UNAUTHORIZED);
-        $response->headers->clearCookie('BEARER');
-        $response->headers->clearCookie('REFRESH_TOKEN');
-        return $response;
-        }
-
-        $user = $refreshToken->getAccount();
-        if (!$user) {
-            return $this->json(['message' => 'Utilisateur non trouvé'], Response::HTTP_UNAUTHORIZED);
-        }
-
-        $refreshToken->setIsRevoked(true);
-        $entityManager->persist($refreshToken);
-
-        $newRefreshToken =  $refreshTokenService->createRefreshToken($user);
-        $newJwt = $JWTManager->create($user);
-        
-        $jwtCookie = Cookie::create('BEARER')
-                ->withValue($newJwt)
-                ->withExpires(new \DateTime('+1 hour'))
-                ->withPath('/')
-                ->withSecure(false)
-                ->withHttpOnly(true)
-                ->withSameSite('Strict');
-        $refreshTokenCookie = Cookie::create('REFRESH_TOKEN')
-                ->withValue($newRefreshToken->getRefreshToken())
-                ->withExpires(new \DateTime('+2 days'))
-                ->withPath('/')
-                ->withSecure(false)
-                ->withHttpOnly(true)
-                ->withSameSite('Strict');
-
-        $entityManager->flush();
-        $response =  $this->json([
-            'message' => 'Token rafraîchi avec succès',
-        ]);
-        $response->headers->setCookie($jwtCookie);
-        $response->headers->setCookie($refreshTokenCookie);
-        return $response;
-
     }
 
     #[Route('/logout', name: 'logout', methods: ['POST'])]

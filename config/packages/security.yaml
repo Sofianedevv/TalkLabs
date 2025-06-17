@@ -19,7 +19,6 @@ security:
             pattern: ^/api/(login|register|test|test-token)
             stateless: true
             security: false
-            
         api:
             pattern: ^/api
             stateless: true
