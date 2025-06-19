@@ -25,4 +25,23 @@ Commande pour charger les données :
 ````bash
 docker compose exec php bin/console hautelook:fixtures:load
 ````
+
+Commande pour mettre en place l'authentification via Token JWT
+````bash
+mkdir -p config/jwt
+openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096
+openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
+````
+
+### Variable D'environnement Model
+````
+APP_SECRET=****
+DATABASE_URL="pgsql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=16&charset=utf8"
+POSTGRES_HOST=yourHost
+POSTGRES_USER=yourUser
+POSTGRES_PASSWORD=yourPassword
+POSTGRES_DB=YourNameOfDatabase
+LEXIK_JWT_PASSPHRASE=yourSecretSetence
+MAILER_DSN=null://null
+````
 Copyright © 2024 [Arthur Brouard, Sid-Ahmed ainsi que Sofiane Chadili]
