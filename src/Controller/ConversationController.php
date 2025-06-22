@@ -46,7 +46,12 @@ final class ConversationController extends AbstractController
     #[Route('/conversations/public', name: 'get_public_conversation', methods: ['GET'])]
     public function getConversations(ConversationService $service): JsonResponse
     {
-        return $this->json($service->getAllPublicConversations(), Response::HTTP_OK);
+        try {
+            return $this->json($service->getAllPublicConversations(), Response::HTTP_OK);
+        }catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+
     }
 
     #[Route('/update/conversation/{id}', name: 'update_conversation', methods: ['PUT'])]
@@ -95,7 +100,7 @@ final class ConversationController extends AbstractController
     ): JsonResponse {
         try{
             return $this->json($service->getConversationById($id), Response::HTTP_OK);
-        }catch (\RuntimeException $e){
+        } catch (\RuntimeException $e){
             return $this->json(['error' => $e->getMessage()], 400);
         }
 
@@ -110,6 +115,18 @@ final class ConversationController extends AbstractController
         }
 
     }
+
+    #[Route('/conversations/category/{categoryId}', name: 'get_conversation_by_category', methods: ['GET'])]
+    public function getPublicConversationByCategory(ConversationService $conversationService, $categoryId) : JsonResponse {
+        try {
+            return $this->json($conversationService->getPublicConversationsByCategory($categoryId), Response::HTTP_OK);
+
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+
 
     #[Route('/messages/upload', name: 'upload_media', methods: ['POST', 'OPTIONS'])]
     public function upload(Request $request, ConversationService $service): JsonResponse

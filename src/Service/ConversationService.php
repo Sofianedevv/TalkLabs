@@ -5,6 +5,7 @@ namespace App\Service;
 use App\DTO\ConversationDTO;
 
 use App\DTO\ConversationEditDTO;
+use App\DTO\ConversationReadDTO;
 use App\Entity\Conversation;
 use App\Entity\Accounts;
 use App\Enum\ConversationStatusEnum;
@@ -32,7 +33,7 @@ class ConversationService
 {
 
     private EntityManagerInterface $em;
-    private categoryRepository $categoryRepository;
+    private CategoryRepository $categoryRepository;
     private AccountsRepository $accountsRepository;
     private ConversationMapper $conversationMapper;
     private ConversationRepository $conversationRepository;
@@ -69,13 +70,13 @@ class ConversationService
             throw new \RuntimeException('Utilisateur non trouvé');
         }
         
-        //Statique
-        $category = $this->categoryRepository->findOneBy(['name' => "Humour"]);
-        if (!$category) {
-            throw new \RuntimeException('Catégorie non trouvée');
+        $categories = $this->categoryRepository->findBy(['id' => $dto->getCategoriesId()]);
+
+        if(count($categories) === 0) {
+            throw new \RuntimeException('Aucune catégorie trouvé');
         }
 
-        $conversation = $this->conversationMapper->dtoToConversation($dto, $creator, $category);
+        $conversation = $this->conversationMapper->dtoToConversation($dto, $creator, $categories);
         $this->em->persist($conversation);
         $this->em->flush();
 
@@ -84,20 +85,13 @@ class ConversationService
 
     public function getAllPublicConversations(): array
     {
-        $conversations = $this->conversationRepository->findAllPublicConversations();
-        $data = [];
-        foreach ($conversations as $conversation) {
-            $data[] = [
-                'id' => $conversation->getId(),
-                'title' => $conversation->getTitle(),
-                'description' => $conversation->getDescription(),
-                'status' => $conversation->getStatus()->value,
-                'content' => $conversation->getContent(),
-                'is_public' => $conversation->isPublic(),
-                'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
-            ];
-        }
-        return $data;
+            $conversations = $this->conversationRepository->findAllPublicConversations();
+            $data = [];
+            foreach ($conversations as $conversation) {
+                $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
+            }
+
+            return $data;
     }
 
     public function editMessage($id, ConversationDTO $dto): bool
@@ -117,12 +111,12 @@ class ConversationService
             throw new \RuntimeException('Vous n\'êtes pas autorisé à modifier cette conversaiton');
         }
 
-        //Statique
-        $category = $this->categoryRepository->findOneBy(['name' => "Humour"]);
-        if (!$category) {
-            throw new \RuntimeException('Catégorie non trouvée');
+        $categories = $this->categoryRepository->findBy(['id' => $dto->getCategoriesId()]);
+
+        if(count($categories) === 0) {
+            throw new \RuntimeException('Aucune catégorie trouvé');
         }
-        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $category);
+        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $categories);
 
         $this->em->persist($conversation);
         $this->em->flush();
@@ -166,7 +160,7 @@ class ConversationService
             throw new \RuntimeException('Conversation non trouvée');
         }
 
-        return $this->conversationMapper->conversationToDTOConversation($conversation);
+        return $this->conversationMapper->conversationToReadDTO($conversation);
     }
 
     public function getConversationsByUser(): array {
@@ -177,18 +171,10 @@ class ConversationService
         }
 
         $conversations = $this->conversationRepository->findBy(['creator' => $user]);
+
         $data = [];
         foreach ($conversations as $conversation) {
-            $data[] = [
-                'id' => $conversation->getId(),
-                'title' => $conversation->getTitle(),
-                'description' => $conversation->getDescription(),
-                'status' => $conversation->getStatus()->value,
-                'content' => $conversation->getContent(),
-                'is_public' => $conversation->isPublic(),
-                'created_at' => $conversation->getCreatedAt()->format('Y-m-d H:i:s'),
-                'updated_at' => $conversation->getUpdatedAt()->format('Y-m-d H:i:s'),
-            ];
+            $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
         }
         return $data;
 
@@ -216,6 +202,18 @@ class ConversationService
         }
 
         return $res;
+    }
+
+    public function getPublicConversationsByCategory(int $categoryId) : array {
+        $conversations = $this->conversationRepository->findPublicConversationsByCategory($categoryId);
+        if(!$conversations) {
+            throw new \RuntimeException('Conversation non trouvée');
+        }
+        $data = [];
+        foreach ($conversations as $conversation) {
+            $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
+        }
+        return $data;
     }
 
     private function generateUniqueFilename(UploadedFile $file) : string {

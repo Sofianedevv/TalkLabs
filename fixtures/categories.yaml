@@ -2,3 +2,36 @@ App\Entity\Category:
   category_1:
     name: "Humour"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_2:
+    name: "Amour"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_3:
+    name: "Conseils"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_4:
+    name: "Petits secrets"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_5:
+    name: "Débats"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_6:
+    name: "Anecdotes"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_7:
+    name: "Voyages"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_8:
+    name: "Musique"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_9:
+    name: "Films & séries"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_10:
+    name: "Sport"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_11:
+    name: "Jeux Videos"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
+  category_12:
+    name: "Technologies"
+    createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
