@@ -11,6 +11,7 @@ class CategoryMapper {
         $dto = new CategoryDTO();
         $dto->setId($category->getId());
         $dto->setName($category->getName());
+        $dto->setShortName($category->getShortName());
         return $dto; 
     }
 

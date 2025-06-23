@@ -1,37 +1,49 @@
 App\Entity\Category:
   category_1:
     name: "Humour"
+    shortName: "HUM"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_2:
     name: "Amour"
+    shortName: "AMR"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_3:
     name: "Conseils"
+    shortName: "CNS"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_4:
     name: "Petits secrets"
+    shortName: "PSR"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_5:
     name: "Débats"
+    shortName: "DBT"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_6:
     name: "Anecdotes"
+    shortName: "ANC"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_7:
     name: "Voyages"
+    shortName: "VYG"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_8:
     name: "Musique"
+    shortName: "MSQ"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_9:
     name: "Films & séries"
+    shortName: "FLS"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_10:
     name: "Sport"
+    shortName: "SPT"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_11:
     name: "Jeux Videos"
+    shortName: "JVS"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"
   category_12:
     name: "Technologies"
+    shortName: "TEC"
     createdAt: "<dateTimeBetween('-1 week', '+1 week')>"

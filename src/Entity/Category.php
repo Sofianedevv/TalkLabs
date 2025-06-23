@@ -27,6 +27,9 @@ class Category
     #[ORM\ManyToMany(targetEntity: Conversation::class, mappedBy: 'categories')]
     private Collection $conversations;
 
+    #[ORM\Column(length: 3)]
+    private ?string $shortName = null;
+
     public function __construct()
     {
         $this->conversations = new ArrayCollection();
@@ -84,6 +87,18 @@ class Category
         if ($this->conversations->removeElement($conversation)) {
             $conversation->removeCategory($this);
         }
+
+        return $this;
+    }
+
+    public function getShortName(): ?string
+    {
+        return $this->shortName;
+    }
+
+    public function setShortName(string $shortName): static
+    {
+        $this->shortName = $shortName;
 
         return $this;
     }
