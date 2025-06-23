@@ -49,4 +49,15 @@ class ConversationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findPublicConversationsByCategory(int $categoryId): array {
+        return $this->createQueryBuilder('c')
+                ->innerJoin('c.categories', 'cat')
+                ->where('cat.id = :categoryId')
+                ->andWhere('c.isPublic = :isPublic')
+                ->setParameter('categoryId', $categoryId)
+                ->setParameter('isPublic', true)
+                ->getQuery()
+                ->getResult();
+    }
 }

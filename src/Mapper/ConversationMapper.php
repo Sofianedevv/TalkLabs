@@ -4,6 +4,7 @@ namespace App\Mapper;
 
 use App\DTO\ConversationDTO;
 use App\DTO\ConversationEditDTO;
+use App\DTO\ConversationReadDTO;
 use App\Entity\Accounts;
 use App\Entity\Category;
 use App\Entity\Conversation;
@@ -11,21 +12,30 @@ use App\Enum\ConversationStatusEnum;
 
 class ConversationMapper
 {
+
+    private CategoryMapper $categoryMapper;
+
+    public function __construct(CategoryMapper $categoryMapper) {
+        $this->categoryMapper = $categoryMapper;
+    }
+
     public function dtoToConversation(
         ConversationDTO $dto,
         Accounts        $creator,
-        Category        $category
+       array $categories
     ): Conversation {
         $conversation = new Conversation();
         $conversation->setTitle($dto->getTitle());
         $conversation->setDescription($dto->getDescription());
         $conversation->setContent($dto->getContent());
         $conversation->setCreator($creator);
-        $conversation->addCategory($category);
         $conversation->setStatus(ConversationStatusEnum::from($dto->getStatus()));
         $conversation->setIsPublic($dto->getIsPublic() ?? true);
         $conversation->setCreatedAt(new \DateTimeImmutable());
         $conversation->setUpdatedAt(new \DateTimeImmutable());
+        foreach($categories as $category) {
+            $conversation->addCategory($category);
+        }
         return $conversation;
     }
 
@@ -33,15 +43,17 @@ class ConversationMapper
         ConversationDTO $dto,
         Conversation $conversation,
         Accounts        $creator,
-        Category        $category
+        array $categories
     ): Conversation {
         $conversation->setTitle($dto->getTitle());
         $conversation->setDescription($dto->getDescription());
         $conversation->setContent($dto->getContent());
-        $conversation->addCategory($category);
         $conversation->setStatus(ConversationStatusEnum::from($dto->getStatus()));
         $conversation->setIsPublic($dto->getIsPublic());
         $conversation->setUpdatedAt(new \DateTimeImmutable());
+        foreach($categories as $category) {
+            $conversation->addCategory($category);
+        }
         return $conversation;
     }
 
@@ -53,7 +65,31 @@ class ConversationMapper
         $conversationDTO->setContent($conversation->getContent());
         $conversationDTO->setStatus($conversation->getStatus()->value);
         $conversationDTO->setIsPublic($conversation->isPublic() );
-        $conversationDTO->setCategoriesId([1] ); //TODO mettre la logique pour la gestion des id pour les categories
+        $categories = [];
+        foreach($conversation->getCategories() as $category){
+            $categories[] = $this->categoryMapper->categoryToDTO($category);
+        }
+        $conversationDTO->setCategoryId($categories);
         return $conversationDTO;
+    }
+
+    public function conversationToReadDTO(Conversation $conversation) : ConversationReadDTO {
+        $dto = new ConversationReadDTO();
+        $dto->setId($conversation->getId());
+        $dto->setTitle($conversation->getTitle());
+        $dto->setDescription($conversation->getDescription());
+        $dto->setContent($conversation->getContent());
+        $dto->setStatus($conversation->getStatus()->value);
+        $dto->setIsPublic($conversation->isPublic());
+        $dto->setCreatedAt($conversation->getCreatedAt()->format('Y-m-d H:i:s'));
+        $dto->setUpdatedAt($conversation->getUpdatedAt()->format('Y-m-d H:i:s'));
+        $categories = [];
+        foreach ($conversation->getCategories() as $category) {
+            $categories[] = $this->categoryMapper->categoryToDTO($category);
+
+        }
+        $dto->setCategoriesId($categories);
+
+        return $dto;
     }
 }
