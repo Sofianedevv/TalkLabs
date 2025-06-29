@@ -6,6 +6,7 @@ use App\Entity\Accounts;
 use App\Repository\AccountsRepository;
 use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
+use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Dom\Entity;
 use Psr\Log\LoggerInterface;
@@ -21,9 +22,16 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Uid\Uuid;
 
-#[Route('/api', name: 'api_')]
+#[Route('/api', name: 'app_')]
 class AuthController extends AbstractController
 {
+
+    private TwoFactorService $twoFactorService;
+
+   public function __construct(TwoFactorService $twoFactorService) {
+        $this->twoFactorService = $twoFactorService;
+    }
+
     #[Route('/register', name: 'register', methods: ['POST', 'OPTIONS'])]
     public function register(
         Request $request, 
@@ -95,6 +103,7 @@ class AuthController extends AbstractController
         LoggerInterface $logger,
         RefreshTokenService $refreshTokenService
     ): JsonResponse {
+
         if ($request->getMethod() === 'OPTIONS') {
             return new JsonResponse([], Response::HTTP_OK);
         }
@@ -120,7 +129,16 @@ class AuthController extends AbstractController
                     'message' => 'Identifiants invalides'
                 ], Response::HTTP_UNAUTHORIZED);
             }
-            
+
+            if($user->isTwoFactorEnabled()) {
+                if (empty($data['totpCode'])) {
+                    return $this->json(['message' => 'Code 2FA requis', 'isTwoFactorEnabled' => true], Response::HTTP_OK);
+                }
+
+                if(!$this->twoFactorService->validateTotpCodeAfterLogin($user, $data['totpCode'])) {
+                    return $this->json(['message' => 'Code 2FA invalide'], Response::HTTP_UNAUTHORIZED);
+                }
+            }
             $token = $JWTManager->create($user);
             $refreshToken = $refreshTokenService->createRefreshToken($user);
 
@@ -148,7 +166,9 @@ class AuthController extends AbstractController
                     'id' => $user->getId(),
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
-                    'username' => $user->getUsername()
+                    'username' => $user->getUsername(),
+                    'isTwofactorEnabled' => $user->isTwoFactorEnabled()
+
                 ]
             ]);
 
@@ -180,7 +200,8 @@ class AuthController extends AbstractController
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
                     'username' => $user->getUsername(),
-                    'avatarUrl' => $user->getAvatarUrl()
+                    'avatarUrl' => $user->getAvatarUrl(),
+                    'isTwofactorEnabled' => $user->isTwoFactorEnabled()
                 ]
             ]);
         } catch (\Exception $e) {

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Repository\AccountsRepository;
+use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +30,8 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private TwoFactorService $twoFactorService
     ) {
     }
 
@@ -52,6 +54,15 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // /** @var \App\Entity\Accounts $user */
+        // $user = $token->getUser();
+        
+        // if($user->isTwoFactorEnabled()) {
+        //     $request->getSession()->set('2fa_user_id', $user->getId());
+        //     $request->getSession()->remove('_securtiy_'.$firewallName);
+        //     return new RedirectResponse($this->urlGenerator->generate('app_2fa'));
+        // }
+
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }

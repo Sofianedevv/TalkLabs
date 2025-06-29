@@ -33,6 +33,10 @@ openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_
 openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout
 ````
 
+Générer une clé de chiffrement AES-256 à placer dans le .env le 2FA
+````bash
+php -r "echo bin2hex(random_bytes(32)) . PHP_EOL;"
+````
 ### Variable D'environnement Model
 ````
 APP_SECRET=****
@@ -42,6 +46,7 @@ POSTGRES_USER=yourUser
 POSTGRES_PASSWORD=yourPassword
 POSTGRES_DB=YourNameOfDatabase
 LEXIK_JWT_PASSPHRASE=yourSecretSetence
+APP_2FA_KEY=cledechiffrementAES-256
 MAILER_DSN=null://null
 ````
 Copyright © 2024 [Arthur Brouard, Sid-Ahmed ainsi que Sofiane Chadili]

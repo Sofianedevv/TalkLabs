@@ -105,6 +105,13 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: RefreshToken::class, mappedBy: 'account')]
     private Collection $refreshTokens;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $totpSecret = null;
+
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    private ?bool $isTwoFactorEnabled = false;
+
+
     public function __construct()
     {
         $this->conversations = new ArrayCollection();
@@ -528,6 +535,30 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
                 $refreshToken->setAccount(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTotpSecret(): ?string
+    {
+        return $this->totpSecret;
+    }
+
+    public function setTotpSecret(?string $totpSecret): static
+    {
+        $this->totpSecret = $totpSecret;
+
+        return $this;
+    }
+
+    public function isTwoFactorEnabled(): ?bool
+    {
+        return $this->isTwoFactorEnabled;
+    }
+
+    public function setIsTwoFactorEnabled(bool $isTwoFactorEnabled): static
+    {
+        $this->isTwoFactorEnabled = $isTwoFactorEnabled;
 
         return $this;
     }
