@@ -13,6 +13,7 @@ class ConversationReadDTO
     private array $categoriesId;
     private string $createdAt;
     private ?string $updatedAt;
+    private string $author;
 
 
     public function getId(): int
@@ -96,5 +97,14 @@ class ConversationReadDTO
     public function setUpdatedAt(?string $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function getAuthor(): ?string
+    {
+        return $this->author;
+    }
+    public function setAuthor(?string $author): void
+    {
+        $this->author = $author;
     }
 }

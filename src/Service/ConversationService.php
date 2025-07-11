@@ -221,7 +221,7 @@ class ConversationService
         $slugFilename = $this->slugger->slug($initialFilename);
         $extension = $file->guessExtension();
 
-        return $slugFilename . '-' . uniqid() . '.' . $extension;
+        return $slugFilename . '-' . uniqid() . '_temp' . '.' . $extension;
     }
 
 }

@@ -83,6 +83,7 @@ class ConversationMapper
         $dto->setIsPublic($conversation->isPublic());
         $dto->setCreatedAt($conversation->getCreatedAt()->format('Y-m-d H:i:s'));
         $dto->setUpdatedAt($conversation->getUpdatedAt()->format('Y-m-d H:i:s'));
+        $dto->setAuthor($conversation->getCreator()->getUsername());
         $categories = [];
         foreach ($conversation->getCategories() as $category) {
             $categories[] = $this->categoryMapper->categoryToDTO($category);
