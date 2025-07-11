@@ -242,9 +242,9 @@ class AuthController extends AbstractController
 
         // Supprimer les cookies
         $response = new JsonResponse(['message' => 'Déconnexion réussie']);
-        $response->headers->clearCookie('BEARER');
-        $response->headers->clearCookie('REFRESH_TOKEN');
-
+        // Alternative : forcer l'expiration des cookies
+        $response->headers->clearCookie('BEARER', '/',);
+        $response->headers->clearCookie('REFRESH_TOKEN', '/');
         return $response;
     }
 } 

@@ -53,6 +53,10 @@ class JWTRefreshTokenListener {
             if($request->getMethod() === 'OPTIONS') {
                 return;
             }
+            // AJOUTER CETTE CONDITION POUR EXCLURE LE LOGOUT
+            if($request->getPathInfo() === '/api/logout') {
+                return;
+            }
 
             $refreshTokenValue = $request->cookies->get('REFRESH_TOKEN');
             
