@@ -9,7 +9,6 @@ services:
       - vue_build:/usr/share/nginx/html:ro  # Standard nginx
     depends_on:
       - php
-      - vuejs
     networks:
       - networks_talkLabs
 

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Conversation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\ArrayParameterType;
 
 /**
  * @extends ServiceEntityRepository<Conversation>
@@ -59,5 +60,32 @@ class ConversationRepository extends ServiceEntityRepository
                 ->setParameter('isPublic', true)
                 ->getQuery()
                 ->getResult();
+    }
+
+    public function findPublicConversationsByCategoryNames(array $categoryNames) : array {
+              return $this->createQueryBuilder('c')
+                ->innerJoin('c.categories', 'cat')
+                ->where('cat.name IN (:names)')
+                ->andWhere('c.isPublic = :isPublic')
+                ->setParameter('names', $categoryNames, ArrayParameterType::STRING)
+                ->setParameter('isPublic', true)
+                ->groupBy('c.id')
+                ->getQuery()
+                ->getResult();
+    }
+
+    public function findPublicConversationsByTitleAndCategoryNames(string $title, array $categoryNames): array
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.categories', 'cat')
+            ->where('c.isPublic = :isPublic')
+            ->andWhere('LOWER(c.title) LIKE :title')
+            ->andWhere('cat.name IN (:names)')
+            ->setParameter('status', 'public') 
+            ->setParameter('title', '%' . strtolower($title) . '%')
+            ->setParameter('names', $categoryNames, ArrayParameterType::STRING)
+            ->groupBy('c.id')
+            ->getQuery()
+            ->getResult();
     }
 }

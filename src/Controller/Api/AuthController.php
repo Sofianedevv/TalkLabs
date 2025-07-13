@@ -149,7 +149,7 @@ class AuthController extends AbstractController
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
-                ->withExpires(new \DateTime('+1 minutes'))
+                ->withExpires(new \DateTime('+10 minutes'))
                 ->withPath('/')
                 ->withSecure(false)
                 ->withHttpOnly(true)

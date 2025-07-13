@@ -86,12 +86,8 @@ class ConversationService
     public function getAllPublicConversations(): array
     {
             $conversations = $this->conversationRepository->findAllPublicConversations();
-            $data = [];
-            foreach ($conversations as $conversation) {
-                $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
-            }
+            return $this->conversationToDTO($conversations);
 
-            return $data;
     }
 
     public function editMessage($id, ConversationDTO $dto): bool
@@ -171,13 +167,7 @@ class ConversationService
         }
 
         $conversations = $this->conversationRepository->findBy(['creator' => $user]);
-
-        $data = [];
-        foreach ($conversations as $conversation) {
-            $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
-        }
-        return $data;
-
+        return $this->conversationToDTO($conversations);
     }
 
     public function uploadMedia(Request $request) : array {
@@ -206,15 +196,30 @@ class ConversationService
 
     public function getPublicConversationsByCategory(int $categoryId) : array {
         $conversations = $this->conversationRepository->findPublicConversationsByCategory($categoryId);
-        if(!$conversations) {
-            throw new \RuntimeException('Conversation non trouvée');
-        }
-        $data = [];
-        foreach ($conversations as $conversation) {
-            $data[] = $this->conversationMapper->conversationToReadDTO($conversation);
-        }
-        return $data;
+        return $this->conversationToDTO($conversations);
     }
+
+    public function getPublicConversationsByCategoryNames(array $categoryNames) : array {
+        
+        if(empty($categoryNames)) {
+         return $this->getAllPublicConversations();
+        }
+        $conversations = $this->conversationRepository->findPublicConversationsByCategoryNames($categoryNames);
+        return $this->conversationToDTO($conversations);
+    }
+
+    
+    public function searchPublicConversation(string $title, array $categoryNames) : array {
+        $title = trim($title);
+
+        if(empty($categoryNames)) {
+            return $this->searchConversation($title);
+        }
+
+        $conversations = $this->conversationRepository->findPublicConversationByTitleAndCategoryNames($title, $categoryNames);
+        return $this->conversationToDTO($conversations);
+    }
+
 
     private function generateUniqueFilename(UploadedFile $file) : string {
         $initialFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -222,6 +227,30 @@ class ConversationService
         $extension = $file->guessExtension();
 
         return $slugFilename . '-' . uniqid() . '_temp' . '.' . $extension;
+    }
+
+    private function  conversationToDTO(array $conversations) : array {
+
+        if(!$conversations) {
+            return [];
+        }
+
+        $convs = [];
+        foreach($conversations as $conversation) {
+            $convs[] = $this->conversationMapper->conversationToReadDTO($conversation);
+        }
+
+        return $convs;
+    }
+
+    private function searchConversation(string $title): array {
+        if (empty($title)) {
+            $conversations = $this->conversationRepository->findAllPublicConversations();
+        } else {
+            $conversations = $this->conversationRepository->findPublicConversationsByTitle($title);
+        }
+
+        return $this->conversationToDTO($conversations);
     }
 
 }
