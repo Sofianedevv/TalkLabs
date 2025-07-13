@@ -6,10 +6,11 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./:/var/www/html/:rw
+      - vue_build:/var/www/html/front-dist:ro 
       - ./logs/nginx:/var/log/nginx/:rw
     depends_on:
       - php
+      - vuejs
     networks:
       - networks_talkLabs
 
@@ -20,15 +21,25 @@ services:
     volumes:
       - ./:/var/www/html
     depends_on:
-      - database
+      - postgres
     networks:
       - networks_talkLabs
     environment:
        DATABASE_URL: ${DATABASE_URL}
+
+  vuejs:
+    build: 
+     context: https://github.com/LuzBoger/talk-lab-front.git#Moussi
+    container_name: talkLabs_vue
+    volumes:
+      - vue_build:/app/dist 
+    networks: 
+      - networks_talkLabs
+
   
-  database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
-    container_name: talkLabs_database
+  postgres:
+    image: postgres:latest
+    container_name: talkLabs_postgres_database
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -39,14 +50,14 @@ services:
       retries: 5
       start_period: 60s
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
-      - ./docker/db/data:/var/lib/postgresql/data:rw
+      - postgres_data:/var/lib/postgresql/data:rw
     networks:
       - networks_talkLabs
   
 
 volumes:
-  database_data:
+  postgres_data:
+  vue_build:
 
 networks:
   networks_talkLabs:
