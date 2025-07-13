@@ -10,7 +10,7 @@
 /vendor/
 /docker/db/data/
 /logs/nginx
-
+/public/upload/
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###
