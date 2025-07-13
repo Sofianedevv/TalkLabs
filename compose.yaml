@@ -6,8 +6,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - vue_build:/var/www/html/front-dist:ro 
-      - ./logs/nginx:/var/log/nginx/:rw
+      - vue_build:/usr/share/nginx/html:ro  # Standard nginx
     depends_on:
       - php
       - vuejs
@@ -28,12 +27,12 @@ services:
        DATABASE_URL: ${DATABASE_URL}
 
   vuejs:
-    build: 
-     context: https://github.com/LuzBoger/talk-lab-front.git#Moussi
+    build:
+      context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
     container_name: talkLabs_vue
     volumes:
-      - vue_build:/app/dist 
-    networks: 
+      - vue_build:/usr/share/nginx/html # Même chemin
+    networks:
       - networks_talkLabs
 
   
