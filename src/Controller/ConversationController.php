@@ -127,19 +127,8 @@ final class ConversationController extends AbstractController
         }
     }
 
-    #[Route('/conversations/by-categories', name: 'get_public_conversation_by_category', methods: ['GET'])]
-    public function getPublicConversationByCategoryNames(ConversationService $conversationService, #[MapQueryParameter] ?array $category = null): JsonResponse
-    {
-        $categoryNames = $category ?? [];
-        try {
-            return $this->json($conversationService->getPublicConversationsByCategoryNames($categoryNames));
-        } catch (\RuntimeException $e){
-            return $this->json(['error' => $e->getMessage()], 400);
-        }
-    }
-
     #[Route('/conversations/search', name: 'search_public_conversation_by_category', methods: ['GET'])]
-    public function searchPublicConversation(ConversationService $conversationService,#[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null): JsonResponse {
+    public function searchPublicConversation(ConversationService $conversationService, #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null): JsonResponse {
         $categoryNames = $category ?? [];
         $titleConv = $title ?? '';
 
@@ -150,6 +139,19 @@ final class ConversationController extends AbstractController
         }
     }
 
+    #[Route('/public-conversations', name: 'public_conversations_paginated', methods: ['GET'])]
+    public function getPaginatedConversations(ConversationService $conversationService,  #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null,  #[MapQueryParameter] ?int $page = 1, #[MapQueryParameter] ?int $limit = 10)  {
+        
+        $categoryNames = $category ?? [];
+        $titleConv = $title ?? '';
+
+        try {
+            $convs = $this->json($conversationService->searchPublicConversationsPaginated($titleConv, $categoryNames, $page,$limit));
+            return $this->json($convs);
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
 
 
 

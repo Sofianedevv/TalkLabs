@@ -199,16 +199,7 @@ class ConversationService
         return $this->conversationToDTO($conversations);
     }
 
-    public function getPublicConversationsByCategoryNames(array $categoryNames) : array {
-        
-        if(empty($categoryNames)) {
-         return $this->getAllPublicConversations();
-        }
-        $conversations = $this->conversationRepository->findPublicConversationsByCategoryNames($categoryNames);
-        return $this->conversationToDTO($conversations);
-    }
-
-    
+     
     public function searchPublicConversation(string $title, array $categoryNames) : array {
         $title = trim($title);
 
@@ -216,8 +207,20 @@ class ConversationService
             return $this->searchConversation($title);
         }
 
-        $conversations = $this->conversationRepository->findPublicConversationByTitleAndCategoryNames($title, $categoryNames);
+        $conversations = $this->conversationRepository->findPublicConversationsByTitleAndCategoryNames($title, $categoryNames);
         return $this->conversationToDTO($conversations);
+    }
+
+    public function searchPublicConversationsPaginated(string $title,array $categoryNames, int $page, int $limit): array {
+            $res = $this->conversationRepository->findPublicConversationsPaginated($title, $categoryNames, $page, $limit);
+
+            return [
+                'total' => $res['total'],
+                'pages' => $res['pages'],
+                'currentPage' => $res['currentPage'],
+                'limit' => $res['limit'],
+                'conversations' => $this->conversationToDTO($res['conversations'])
+            ];
     }
 
 

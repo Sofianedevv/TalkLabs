@@ -19,18 +19,12 @@ final class Version20250626193842 extends AbstractMigration
         $this->addSql(<<<'SQL'
             ALTER TABLE accounts ADD totp_secret VARCHAR(16) DEFAULT NULL
         SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE category ALTER short_name DROP DEFAULT
-        SQL);
     }
 
     public function down(Schema $schema): void
     {
         $this->addSql(<<<'SQL'
             CREATE SCHEMA public
-        SQL);
-        $this->addSql(<<<'SQL'
-            ALTER TABLE category ALTER short_name SET DEFAULT 'DEF'
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE accounts DROP totp_secret
