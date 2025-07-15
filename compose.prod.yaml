@@ -1,0 +1,68 @@
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    container_name: talklabs_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - vue_build:/usr/share/nginx/html:ro
+    depends_on:
+      - php
+      - vuejs
+    networks:
+      - networks_talklabs
+    restart: unless-stopped
+
+  php:
+    build:
+      context: ./docker/php
+    container_name: talklabs_php
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - postgres
+    networks:
+      - networks_talklabs
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+    restart: unless-stopped
+
+  vuejs:
+    build:
+      context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
+    container_name: talklabs_vue
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - vue_build:/usr/share/nginx/html
+    networks:
+      - networks_talklabs
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:latest
+    container_name: talklabs_postgres_database
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:rw
+    networks:
+      - networks_talklabs
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  vue_build:
+
+networks:
+  networks_talklabs:
+    driver: bridge
