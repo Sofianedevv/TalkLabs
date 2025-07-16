@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - TalkLabs{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Tableau de bord administrateur</h1>
+                <span class="badge bg-primary">Admin</span>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Plans</h5>
+                            <p class="card-text">Gérer les plans d'abonnement</p>
+                            <a href="{{ path('admin_plans') }}" class="btn btn-outline-light">Voir les plans</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Abonnements</h5>
+                            <p class="card-text">Gérer les abonnements</p>
+                            <a href="{{ path('admin_subscriptions') }}" class="btn btn-outline-light">Voir les abonnements</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Utilisateurs</h5>
+                            <p class="card-text">Gérer les utilisateurs</p>
+                            <a href="{{ path('admin_users') }}" class="btn btn-outline-light">Voir les utilisateurs</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Rapports</h5>
+                            <p class="card-text">Statistiques et rapports</p>
+                            <a href="{{ path('admin_reports') }}" class="btn btn-outline-light">Voir les rapports</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>Bienvenue dans l'administration !</strong> Vous avez accès à toutes les fonctionnalités d'administration.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
