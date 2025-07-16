@@ -1,0 +1,45 @@
+FROM php:8.3-fpm
+
+# Extensions PHP nécessaires
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libzip-dev \
+    libicu-dev \
+    unzip \
+    && docker-php-ext-install \
+    pdo_pgsql \
+    zip \
+    intl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copier les fichiers de configuration d'abord
+COPY composer.json composer.lock symfony.lock ./
+
+# Installer les dépendances Composer
+RUN composer install --optimize-autoloader --no-dev --no-scripts
+
+# Copier tout le reste du code
+COPY . .
+
+# Configuration de base
+RUN cp .env.prod .env \
+    && mkdir -p var/cache var/log config/jwt
+
+# Permissions de base
+RUN chown -R www-data:www-data var/ \
+    && chmod -R 755 var/
+
+# Générer les clés JWT (peut échouer, on continue quand même)
+RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || echo "JWT keypair generation failed, will be handled by deploy script"
+
+# Permissions finales pour JWT (si les clés existent)
+RUN if [ -d "config/jwt" ]; then \
+    chown -R www-data:www-data config/jwt/ && \
+    chmod -R 644 config/jwt/*.pem 2>/dev/null || true && \
+    chmod 600 config/jwt/private.pem 2>/dev/null || true; \
+    fi
