@@ -30,3 +30,9 @@ COPY . .
 
 # Générer l'autoloader et exécuter les scripts maintenant que tout est copié
 RUN composer dump-autoload --optimize && composer run-script post-install-cmd
+
+# Assurer les bonnes permissions pour var/
+RUN chown -R www-data:www-data /var/www/html/var && \
+    chmod -R 755 /var/www/html/var && \
+    chown -R www-data:www-data /var/www/html/config && \
+    chmod -R 755 /var/www/html/config
