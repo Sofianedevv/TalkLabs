@@ -7,7 +7,7 @@ services:
       - "8080:80"
     volumes:
       - vue_build:/usr/share/nginx/html:ro
-      - symfony_code:/var/www/html:ro
+      - symfony_app:/var/www/html:ro
     depends_on:
       - php
       - vuejs
@@ -18,7 +18,7 @@ services:
   php:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: docker/php/Dockerfile.prod
     container_name: talklabs_php
     depends_on:
       - postgres
@@ -26,15 +26,17 @@ services:
       - networks_talklabs
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      APP_ENV: prod
-      APP_DEBUG: 0
+      APP_ENV: ${APP_ENV}
+      LEXIK_JWT_PASSPHRASE: ${LEXIK_JWT_PASSPHRASE}
+      APP_2FA_KEY: ${APP_2FA_KEY}
     volumes:
-      - symfony_code:/var/www/html
+      - symfony_app:/var/www/html
     restart: unless-stopped
 
   vuejs:
     build:
       context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
+      dockerfile: Dockerfile
       args:
         - VITE_API_URL=https://talklab.fr/api
         - VITE_BASE_URL=https://talklab.fr
@@ -70,7 +72,7 @@ services:
 volumes:
   postgres_data:
   vue_build:
-  symfony_code:
+  symfony_app:
 
 networks:
   networks_talklabs:
