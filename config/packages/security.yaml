@@ -70,6 +70,11 @@ security:
       - { path: ^/twofactor, roles: IS_AUTHENTICATED_FULLY }
       - { path: ^/login/check-google, roles: PUBLIC_ACCESS }
       - { path: ^/api/connect, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversation/like, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/conversation/remove-like, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/conversation/\d+/likes, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversation/\d+/likers, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/connect, roles: PUBLIC_ACCESS }
       - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
       - { path: ^/admin, roles: ROLE_ADMIN }
       - { path: ^/profile, roles: ROLE_USER }

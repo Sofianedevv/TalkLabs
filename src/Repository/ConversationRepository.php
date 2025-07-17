@@ -125,4 +125,14 @@ class ConversationRepository extends ServiceEntityRepository
         ];
 
     }
+
+    public function findPublicConversationById(int $id) : Conversation {
+        return $this->createQueryBuilder('c')
+                    ->andWhere('c.id = :id')
+                    ->andWhere('c.isPublic = :isPublic')
+                    ->setParameter('id', $id)
+                    ->setParameter('isPublic', true)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+    }
 }
