@@ -20,7 +20,7 @@ security:
             stateless: true
             security: false
         api:
-            pattern: ^/api|^/twofactor
+            pattern: ^/api|^/twofactor|^/admin
             stateless: true
             provider: app_user_provider
             jwt: ~
@@ -50,6 +50,8 @@ security:
       - { path: ^/api/categories, roles: PUBLIC_ACCESS }
       - { path: ^/api/get-conversations-public, roles: PUBLIC_ACCESS }
       - { path: ^/api/get-conversations-by-category/*, roles: PUBLIC_ACCESS }
+      - { path: ^/api/subscription/plans, roles: PUBLIC_ACCESS }
+      - { path: ^/api/subscription, roles: IS_AUTHENTICATED_FULLY }
       - { path: ^/api/test, roles: PUBLIC_ACCESS }
       - { path: ^/api/test-token, roles: PUBLIC_ACCESS }
       - { path: ^/twofactor, roles: IS_AUTHENTICATED_FULLY }

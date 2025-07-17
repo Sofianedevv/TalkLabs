@@ -8,7 +8,6 @@ use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
 use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Dom\Entity;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,11 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\Uid\Uuid;
 
 #[Route('/api', name: 'app_')]
 class AuthController extends AbstractController
@@ -146,7 +142,7 @@ class AuthController extends AbstractController
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
-                ->withExpires(new \DateTime('+1 minutes'))
+                ->withExpires(new \DateTime('+1 hour'))
                 ->withPath('/')
                 ->withSecure(false)
                 ->withHttpOnly(true)
@@ -167,6 +163,7 @@ class AuthController extends AbstractController
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
                     'username' => $user->getUsername(),
+                    'role' => $user->getRole(),
                     'isTwofactorEnabled' => $user->isTwoFactorEnabled()
 
                 ]
@@ -201,6 +198,7 @@ class AuthController extends AbstractController
                     'email' => $user->getEmail(),
                     'username' => $user->getUsername(),
                     'avatarUrl' => $user->getAvatarUrl(),
+                    'role' => $user->getRole(),
                     'isTwofactorEnabled' => $user->isTwoFactorEnabled()
                 ]
             ]);

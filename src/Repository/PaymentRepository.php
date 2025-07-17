@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Payment;
+use App\Enum\PaymentStatusEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,73 @@ class PaymentRepository extends ServiceEntityRepository
         parent::__construct($registry, Payment::class);
     }
 
-//    /**
-//     * @return Payment[] Returns an array of Payment objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Get current month revenue
+     */
+    public function getCurrentMonthRevenue(): float
+    {
+        $startOfMonth = new \DateTime('first day of this month');
+        $endOfMonth = new \DateTime('last day of this month');
 
-//    public function findOneBySomeField($value): ?Payment
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $result = $this->createQueryBuilder('p')
+            ->select('SUM(p.amount)')
+            ->andWhere('p.createdAt BETWEEN :start AND :end')
+            ->andWhere('p.status = :status')
+            ->setParameter('start', $startOfMonth)
+            ->setParameter('end', $endOfMonth)
+            ->setParameter('status', PaymentStatusEnum::COMPLETED)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result ? (float) $result : 0.0;
+    }
+
+    /**
+     * Get monthly statistics
+     */
+    public function getMonthlyStats(): array
+    {
+        // Simplified: return last 6 months
+        $stats = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = new \DateTime();
+            $date->modify("-$i months");
+            $startOfMonth = $date->format('Y-m-01');
+            $endOfMonth = $date->format('Y-m-t');
+
+            $revenue = $this->createQueryBuilder('p')
+                ->select('SUM(p.amount)')
+                ->andWhere('p.createdAt BETWEEN :start AND :end')
+                ->andWhere('p.status = :status')
+                ->setParameter('start', $startOfMonth)
+                ->setParameter('end', $endOfMonth)
+                ->setParameter('status', PaymentStatusEnum::COMPLETED)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $stats[] = [
+                'month' => $date->format('Y-m'),
+                'revenue' => $revenue ? (float) $revenue : 0.0
+            ];
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Get revenue by plan
+     */
+    public function getRevenueByPlan(): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('pl.name, SUM(p.amount) as revenue')
+            ->join('p.subscription', 's')
+            ->join('s.plan', 'pl')
+            ->andWhere('p.status = :status')
+            ->setParameter('status', PaymentStatusEnum::COMPLETED)
+            ->groupBy('pl.id')
+            ->orderBy('revenue', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
 }
