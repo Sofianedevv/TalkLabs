@@ -49,4 +49,9 @@ LEXIK_JWT_PASSPHRASE=yourSecretSetence
 APP_2FA_KEY=cledechiffrementAES-256
 MAILER_DSN=null://null
 ````
+
+### Commande docker importante 
+````
+docker system prune -a --volumes -f
+````
 Copyright © 2024 [Arthur Brouard, Sid-Ahmed ainsi que Sofiane Chadili]
