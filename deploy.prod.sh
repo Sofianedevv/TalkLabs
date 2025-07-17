@@ -62,6 +62,10 @@ docker-compose -f $COMPOSE_FILE exec -T php php bin/console lexik:jwt:generate-k
 echo "🗄️  Création de la base de données si nécessaire..."
 docker-compose -f $COMPOSE_FILE exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
 
+# Générer les migrations automatiquement
+echo "🔧 Génération des migrations à partir des entités..."
+docker-compose -f $COMPOSE_FILE exec -T php php bin/console doctrine:migrations:diff --env=prod
+
 # Diagnostic et réparation des migrations
 echo "🔍 Diagnostic de l'état des migrations..."
 MIGRATION_STATUS=$(docker-compose -f $COMPOSE_FILE exec -T php php bin/console doctrine:migrations:status --env=prod 2>/dev/null | grep "Executed" | tail -1 | awk '{print $4}')
@@ -97,6 +101,10 @@ docker-compose -f $COMPOSE_FILE exec -T php php bin/console cache:clear --env=pr
 echo "🔐 Correction finale des permissions cache..."
 docker-compose -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/var/cache/
 docker-compose -f $COMPOSE_FILE exec -T php chmod -R 755 /var/www/html/var/cache/
+
+# Charger les données de test (fixtures)
+echo "📊 Chargement des données de test..."
+docker-compose -f $COMPOSE_FILE exec -T php php bin/console hautelook:fixtures:load --no-interaction --env=prod || echo "⚠️  Chargement des fixtures échoué ou pas disponible"
 
 echo "✅ Déploiement terminé avec succès!"
 echo "🌐 L'application est accessible sur $TEST_URL"
