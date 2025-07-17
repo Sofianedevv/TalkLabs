@@ -10,6 +10,8 @@ security:
             entity:
                 class: App\Entity\Accounts
                 property: email
+        hwi_oauth.user.provider:
+            id: hwi_oauth.user.provider
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -29,6 +31,16 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\LoginFormAuthenticator
+            oauth:
+                resource_owners:
+                    google: "/login/check-google"
+                login_path: /
+                use_forward: false
+                failure_path: /
+
+                oauth_user_provider:
+                    service: hwi_oauth.user.provider
+                provider: hwi_oauth.user.provider
             logout:
                 path: app_logout
                 target: app_login
@@ -36,6 +48,7 @@ security:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
                 path: /
+            entry_point: App\Security\LoginFormAuthenticator
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -52,9 +65,18 @@ security:
       - { path: ^/api/get-conversations-by-category/*, roles: PUBLIC_ACCESS }
       - { path: ^/api/subscription/plans, roles: PUBLIC_ACCESS }
       - { path: ^/api/subscription, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/conversations/by-categories, roles: PUBLIC_ACCESS }
+      - { path: ^/api/public-conversations, roles: PUBLIC_ACCESS }
       - { path: ^/api/test, roles: PUBLIC_ACCESS }
       - { path: ^/api/test-token, roles: PUBLIC_ACCESS }
       - { path: ^/twofactor, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/login/check-google, roles: PUBLIC_ACCESS }
+      - { path: ^/api/connect, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversation/like, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/conversation/remove-like, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/conversation/\d+/likes, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversation/\d+/likers, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/connect, roles: PUBLIC_ACCESS }
       - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
       - { path: ^/admin, roles: ROLE_ADMIN }
       - { path: ^/profile, roles: ROLE_USER }

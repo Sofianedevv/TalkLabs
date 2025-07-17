@@ -12,6 +12,9 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
         "firebase/php-jwt": "^6.11",
+        "google/apiclient": "*",
+        "hwi/oauth-bundle": "^2.4",
+        "league/oauth2-google": "^4.0",
         "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/cors-bundle": "^2.5",
         "phpdocumentor/reflection-docblock": "^5.6",
@@ -59,7 +62,8 @@
             "symfony/runtime": true
         },
         "bump-after-update": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "process-timeout": 900
     },
     "autoload": {
         "psr-4": {

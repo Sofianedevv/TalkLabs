@@ -6,4 +6,7 @@ controllers:
 
 api_login_check:
     path: /api/login_check
-    methods: ['POST']
+    methods: [ 'POST' ]
+
+google_login:
+    path: /login/check-google

@@ -72,6 +72,12 @@ class Conversation
     #[ORM\Column]
     private array $content = [];
 
+    /**
+     * @var Collection<int, ConversationLike>
+     */
+    #[ORM\OneToMany(targetEntity: ConversationLike::class, mappedBy: 'conversation')]
+    private Collection $conversationLikes;
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
@@ -79,6 +85,7 @@ class Conversation
         $this->favorites = new ArrayCollection();
         $this->tags = new ArrayCollection();
         $this->reports = new ArrayCollection();
+        $this->conversationLikes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -316,6 +323,36 @@ class Conversation
     public function setContent(array $content): static
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConversationLike>
+     */
+    public function getConversationLikes(): Collection
+    {
+        return $this->conversationLikes;
+    }
+
+    public function addConversationLike(ConversationLike $conversationLike): static
+    {
+        if (!$this->conversationLikes->contains($conversationLike)) {
+            $this->conversationLikes->add($conversationLike);
+            $conversationLike->setConversation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConversationLike(ConversationLike $conversationLike): static
+    {
+        if ($this->conversationLikes->removeElement($conversationLike)) {
+            // set the owning side to null (unless already changed)
+            if ($conversationLike->getConversation() === $this) {
+                $conversationLike->setConversation(null);
+            }
+        }
 
         return $this;
     }

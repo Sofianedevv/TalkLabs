@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -125,6 +126,35 @@ final class ConversationController extends AbstractController
             return $this->json(['error' => $e->getMessage()], 400);
         }
     }
+
+    #[Route('/conversations/search', name: 'search_public_conversation_by_category', methods: ['GET'])]
+    public function searchPublicConversation(ConversationService $conversationService, #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null): JsonResponse {
+        $categoryNames = $category ?? [];
+        $titleConv = $title ?? '';
+
+        try {
+            return $this->json($conversationService->searchPublicConversation($titleConv, $categoryNames));
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route('/public-conversations', name: 'public_conversations_paginated', methods: ['GET'])]
+    public function getPaginatedConversations(ConversationService $conversationService,  #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null,  #[MapQueryParameter] ?int $page = 1, #[MapQueryParameter] ?int $limit = 10)  {
+        
+        $categoryNames = $category ?? [];
+        $titleConv = $title ?? '';
+
+        try {
+            $convs = $this->json($conversationService->searchPublicConversationsPaginated($titleConv, $categoryNames, $page,$limit));
+            return $this->json($convs);
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+
+
 
 
 

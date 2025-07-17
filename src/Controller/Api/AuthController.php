@@ -8,7 +8,10 @@ use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
 use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
+use Google\Client as GoogleClient;
+use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -214,6 +217,91 @@ class AuthController extends AbstractController
             'message' => 'API is working',
             'timestamp' => (new \DateTime())->format('Y-m-d H:i:s')
         ]);
+    }
+
+    #[Route('/login-google', name:"login-google")]
+    public function authWithGoogle(
+        Request $request,
+        AccountsRepository $accountsRepository,
+        EntityManagerInterface $entityManager,
+        JWTTokenManagerInterface $jwt,
+        RefreshTokenService $refreshTokenService,
+        UserPasswordHasherInterface $passwordHasher
+    ) {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['id_token'])) {
+            return $this->json(['message' => 'Access token manquant'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $idToken = $data['id_token'];
+
+        $googleClient = new GoogleClient(['client_id' => $_ENV['GOOGLE_CLIENT_ID'],]);
+        $payload = $googleClient->verifyIdToken($idToken);
+        if (!$payload) {
+            return $this->json(['message' => 'Token invalide'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $email = $payload['email'] ?? null;
+        if (!$email) {
+            return $this->json(['message' => 'Email manquant dans le token'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $accountsRepository->findOneBy(['email' => $email]);
+        if (!$user) {
+            $user = new Accounts();
+            $user->setEmail($email);
+            $user->setName($payload['name'] ?? '');
+            $user->setUsername($payload['given_name'] ?? 'utilisateur_google_' . Uuid::v4());
+            $user->setRole(['ROLE_USER']);
+            $user->setIsVerified(true);
+            $user->setCreatedAt(new \DateTimeImmutable());
+
+            $randomPassword = bin2hex(random_bytes(20));
+            $hashedPassword = $passwordHasher->hashPassword($user, $randomPassword);
+            $user->setPassword($hashedPassword);
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+            $token = $jwt->create($user);
+            $refreshToken = $refreshTokenService->createRefreshToken($user);
+
+
+            //Si on passe le JWT via un cookie à voir
+            $jwtCookie = Cookie::create('BEARER')
+                ->withValue($token)
+                ->withExpires(new \DateTime('+1 minutes'))
+                ->withPath('/')
+                ->withSecure(false)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
+
+            $refreshTokenCookie = Cookie::create('REFRESH_TOKEN')
+                ->withValue($refreshToken->getRefreshToken())
+                ->withExpires(new \DateTime('+2 days'))
+                ->withPath('/')
+                ->withSecure(false)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
+
+            $response = $this->json([
+                'message' => 'Connexion réussie',
+                'user' => [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'username' => $user->getUsername()
+                ]
+            ]);
+
+            $response->headers->setCookie($jwtCookie);
+            $response->headers->setCookie($refreshTokenCookie);
+
+            return $response;
+
+
     }
 
     #[Route('/logout', name: 'logout', methods: ['POST'])]
