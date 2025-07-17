@@ -27,6 +27,7 @@ RUN composer install --no-scripts --no-autoloader
 
 # Copier tout le reste du code
 COPY . .
+RUN composer require hwi/oauth-bundle --no-scripts
 
 # Générer l'autoloader et exécuter les scripts maintenant que tout est copié
 RUN composer dump-autoload --optimize && composer run-script post-install-cmd
