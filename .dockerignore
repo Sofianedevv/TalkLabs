@@ -13,11 +13,6 @@ docker/
 compose*.yaml
 Dockerfile*
 
-# Fichiers de configuration locale
-.env.local
-.env.*.local
-# Ne pas exclure .env.prod car on en a besoin pour la production
-
 # Dossiers de tests
 tests/
 
