@@ -29,6 +29,8 @@ services:
 
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    ports:
+      - "5433:5432"
     container_name: talklabs_database
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
