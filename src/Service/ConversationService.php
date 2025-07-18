@@ -170,6 +170,10 @@ class ConversationService
         return $this->conversationToDTO($conversations);
     }
 
+    public function getMostLikedPublicConversation(int $limit) : array {
+        return $this->conversationToDTO($this->conversationRepository->findMostLikedPublicConversation($limit));
+    }
+
     public function uploadMedia(Request $request) : array {
 
         $res = [];
