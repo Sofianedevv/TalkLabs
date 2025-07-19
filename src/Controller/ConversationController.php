@@ -15,6 +15,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -22,7 +23,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api', name: 'app_')]
 final class ConversationController extends AbstractController
 {
-    #[Route('/conversation', name: 'conversation', methods: ['POST'])]
+    #[Route('/create-conversation', name: 'conversation', methods: ['POST'])]
     public function createConversation(
         Request $request,
         SerializerInterface $serializer,
@@ -43,7 +44,7 @@ final class ConversationController extends AbstractController
         }
     }
 
-    #[Route('/conversations/public', name: 'get_public_conversation', methods: ['GET'])]
+    #[Route('/get-conversations-public', name: 'get_public_conversation', methods: ['GET'])]
     public function getConversations(ConversationService $service): JsonResponse
     {
         try {
@@ -54,7 +55,7 @@ final class ConversationController extends AbstractController
 
     }
 
-    #[Route('/update/conversation/{id}', name: 'update_conversation', methods: ['PUT'])]
+    #[Route('/update-conversation/{id}', name: 'update_conversation', methods: ['PUT'])]
     public function updateConversation(
         Request $request,
         SerializerInterface $serializer,
@@ -78,7 +79,7 @@ final class ConversationController extends AbstractController
     }
 
 
-    #[Route('/delete/conversation/{id}', name: 'delete_conversation', methods: ['DELETE'])]
+    #[Route('/delete-conversation/{id}', name: 'delete_conversation', methods: ['DELETE'])]
     public function deleteConversation(
         ConversationService $service,
         $id
@@ -93,7 +94,7 @@ final class ConversationController extends AbstractController
     }
     
 
-    #[Route('/conversation/{id}', name: 'get_conversation_by_id', methods: ['GET'])]
+    #[Route('/get-conversation/{id}', name: 'get_conversation_by_id', methods: ['GET'])]
     public function getConversationById(
         ConversationService $service,
         $id
@@ -106,7 +107,7 @@ final class ConversationController extends AbstractController
 
     }
 
-    #[Route('/conversations', name: 'get_conversation_by_user', methods: ['GET'])]
+    #[Route('/get-conversations-by-user', name: 'get_conversation_by_user', methods: ['GET'])]
     public function getConversationByUser(ConversationService $service): JsonResponse {
         try{
             return $this->json($service->getConversationsByUser(), Response::HTTP_OK);
@@ -116,7 +117,7 @@ final class ConversationController extends AbstractController
 
     }
 
-    #[Route('/conversations/category/{categoryId}', name: 'get_conversation_by_category', methods: ['GET'])]
+    #[Route('/get-conversations-by-category/{categoryId}', name: 'get_conversation_by_category', methods: ['GET'])]
     public function getPublicConversationByCategory(ConversationService $conversationService, $categoryId) : JsonResponse {
         try {
             return $this->json($conversationService->getPublicConversationsByCategory($categoryId), Response::HTTP_OK);
@@ -125,6 +126,35 @@ final class ConversationController extends AbstractController
             return $this->json(['error' => $e->getMessage()], 400);
         }
     }
+
+    #[Route('/conversations/search', name: 'search_public_conversation_by_category', methods: ['GET'])]
+    public function searchPublicConversation(ConversationService $conversationService, #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null): JsonResponse {
+        $categoryNames = $category ?? [];
+        $titleConv = $title ?? '';
+
+        try {
+            return $this->json($conversationService->searchPublicConversation($titleConv, $categoryNames));
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Route('/public-conversations', name: 'public_conversations_paginated', methods: ['GET'])]
+    public function getPaginatedConversations(ConversationService $conversationService,  #[MapQueryParameter] ?string $title, #[MapQueryParameter] ?array $category = null,  #[MapQueryParameter] ?int $page = 1, #[MapQueryParameter] ?int $limit = 10)  {
+        
+        $categoryNames = $category ?? [];
+        $titleConv = $title ?? '';
+
+        try {
+            $convs = $this->json($conversationService->searchPublicConversationsPaginated($titleConv, $categoryNames, $page,$limit));
+            return $this->json($convs);
+        } catch (\RuntimeException $e){
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+
+
 
 
 

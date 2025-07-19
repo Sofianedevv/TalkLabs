@@ -9,7 +9,6 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -113,6 +112,12 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "boolean", options: ["default" => false])]
     private ?bool $isTwoFactorEnabled = false;
 
+    /**
+     * @var Collection<int, ConversationLike>
+     */
+    #[ORM\OneToMany(targetEntity: ConversationLike::class, mappedBy: 'account')]
+    private Collection $conversationLikes;
+
 
     public function __construct()
     {
@@ -124,6 +129,7 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
         $this->notifications = new ArrayCollection();
         $this->reports = new ArrayCollection();
         $this->refreshTokens = new ArrayCollection();
+        $this->conversationLikes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -561,6 +567,36 @@ class Accounts implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsTwoFactorEnabled(bool $isTwoFactorEnabled): static
     {
         $this->isTwoFactorEnabled = $isTwoFactorEnabled;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConversationLike>
+     */
+    public function getConversationLikes(): Collection
+    {
+        return $this->conversationLikes;
+    }
+
+    public function addConversationLike(ConversationLike $conversationLike): static
+    {
+        if (!$this->conversationLikes->contains($conversationLike)) {
+            $this->conversationLikes->add($conversationLike);
+            $conversationLike->setAccount($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConversationLike(ConversationLike $conversationLike): static
+    {
+        if ($this->conversationLikes->removeElement($conversationLike)) {
+            // set the owning side to null (unless already changed)
+            if ($conversationLike->getAccount() === $this) {
+                $conversationLike->setAccount(null);
+            }
+        }
 
         return $this;
     }

@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Comment;
+use App\Entity\Conversation;
+use App\Enum\CommentStatusEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,4 +42,31 @@ class CommentRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findPendingComments() :array {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.status = :status')
+            ->setParameter('status', CommentStatusEnum::PENDING)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllComment(Conversation $conversation): array {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.publisher', 'p')->addSelect('p')
+            ->leftJoin('c.childComments', 'cc')->addSelect('cc')
+            ->where('c.conversation = :conversation')
+            ->andWhere('c.parentComment IS NULL')
+            ->orderBy('c.createdAt', 'ASC')
+            ->setParameter('conversation', $conversation)
+            ->getQuery()
+            ->getResult();
+    }
+
+
+
+
+
+
+
+
 }

@@ -35,6 +35,18 @@
             "./migrations/.gitignore"
         ]
     },
+    "google/apiclient": {
+        "version": "2.18",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "2.10",
+            "ref": "07a97ec434d43b7903c78069a04c92adb6442e52"
+        },
+        "files": [
+            "config/packages/google_apiclient.yaml"
+        ]
+    },
     "hautelook/alice-bundle": {
         "version": "2.15",
         "recipe": {
@@ -46,6 +58,19 @@
         "files": [
             "./config/packages/hautelook_alice.yaml",
             "./fixtures/.gitignore"
+        ]
+    },
+    "hwi/oauth-bundle": {
+        "version": "2.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "2.0",
+            "ref": "20154480d558409ad3eb9de3644817c81fad2268"
+        },
+        "files": [
+            "config/packages/hwi_oauth.yaml",
+            "config/routes/hwi_oauth_routing.yaml"
         ]
     },
     "lexik/jwt-authentication-bundle": {

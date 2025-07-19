@@ -8,19 +8,18 @@ use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
 use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Dom\Entity;
+use Google\Client as GoogleClient;
+use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\Uid\Uuid;
 
 #[Route('/api', name: 'app_')]
 class AuthController extends AbstractController
@@ -143,6 +142,7 @@ class AuthController extends AbstractController
             $refreshToken = $refreshTokenService->createRefreshToken($user);
 
             
+            //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
                 ->withExpires(new \DateTime('+1 hour'))
@@ -219,6 +219,91 @@ class AuthController extends AbstractController
         ]);
     }
 
+    #[Route('/login-google', name:"login-google")]
+    public function authWithGoogle(
+        Request $request,
+        AccountsRepository $accountsRepository,
+        EntityManagerInterface $entityManager,
+        JWTTokenManagerInterface $jwt,
+        RefreshTokenService $refreshTokenService,
+        UserPasswordHasherInterface $passwordHasher
+    ) {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['id_token'])) {
+            return $this->json(['message' => 'Access token manquant'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $idToken = $data['id_token'];
+
+        $googleClient = new GoogleClient(['client_id' => $_ENV['GOOGLE_CLIENT_ID'],]);
+        $payload = $googleClient->verifyIdToken($idToken);
+        if (!$payload) {
+            return $this->json(['message' => 'Token invalide'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $email = $payload['email'] ?? null;
+        if (!$email) {
+            return $this->json(['message' => 'Email manquant dans le token'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $accountsRepository->findOneBy(['email' => $email]);
+        if (!$user) {
+            $user = new Accounts();
+            $user->setEmail($email);
+            $user->setName($payload['name'] ?? '');
+            $user->setUsername($payload['given_name'] ?? 'utilisateur_google_' . Uuid::v4());
+            $user->setRole(['ROLE_USER']);
+            $user->setIsVerified(true);
+            $user->setCreatedAt(new \DateTimeImmutable());
+
+            $randomPassword = bin2hex(random_bytes(20));
+            $hashedPassword = $passwordHasher->hashPassword($user, $randomPassword);
+            $user->setPassword($hashedPassword);
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
+            $token = $jwt->create($user);
+            $refreshToken = $refreshTokenService->createRefreshToken($user);
+
+
+            //Si on passe le JWT via un cookie à voir
+            $jwtCookie = Cookie::create('BEARER')
+                ->withValue($token)
+                ->withExpires(new \DateTime('+1 minutes'))
+                ->withPath('/')
+                ->withSecure(false)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
+
+            $refreshTokenCookie = Cookie::create('REFRESH_TOKEN')
+                ->withValue($refreshToken->getRefreshToken())
+                ->withExpires(new \DateTime('+2 days'))
+                ->withPath('/')
+                ->withSecure(false)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
+
+            $response = $this->json([
+                'message' => 'Connexion réussie',
+                'user' => [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'username' => $user->getUsername()
+                ]
+            ]);
+
+            $response->headers->setCookie($jwtCookie);
+            $response->headers->setCookie($refreshTokenCookie);
+
+            return $response;
+
+
+    }
+
     #[Route('/logout', name: 'logout', methods: ['POST'])]
     public function logout(
         Request $request,
@@ -241,7 +326,9 @@ class AuthController extends AbstractController
         $entityManager->persist($refreshToken);
         $entityManager->flush();
 
+        // Supprimer les cookies
         $response = new JsonResponse(['message' => 'Déconnexion réussie']);
+        // Alternative : forcer l'expiration des cookies
         $response->headers->clearCookie('BEARER', '/',);
         $response->headers->clearCookie('REFRESH_TOKEN', '/');
         return $response;
