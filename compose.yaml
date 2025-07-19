@@ -2,51 +2,37 @@ services:
   nginx:
     build:
       context: ./docker/nginx
+      dockerfile: Dockerfile
     container_name: talklabs_nginx
     ports:
       - "80:80"
     volumes:
-      - vue_build:/usr/share/nginx/html:ro # Standard nginx
-      - symfony_app:/var/www/html:ro # Partage des fichiers Symfony avec PHP
+      - ./:/var/www/html/:rw
+      - ./logs/nginx:/var/log/nginx/:rw
     depends_on:
       - php
     networks:
       - networks_talklabs
+
   php:
     build:
-      context: ./
-      dockerfile: docker/php/Dockerfile
+      context: ./docker/php
     container_name: talklabs_php
     volumes:
-      - symfony_app:/var/www/html # Volume pour partager avec nginx
+      - ./:/var/www/html
     depends_on:
-      - postgres
+      - database
     networks:
       - networks_talklabs
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      APP_ENV: ${APP_ENV}
-      LEXIK_JWT_PASSPHRASE: ${LEXIK_JWT_PASSPHRASE}
-      APP_2FA_KEY: ${APP_2FA_KEY}
-  vuejs:
-    build:
-      context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
-      args:
-        - VITE_API_URL=http://localhost/api
-        - VITE_BASE_URL=http://localhost
-        - VITE_API_2FA_URL=http://localhost/twofactor
-        - NODE_ENV=development
-    container_name: talklabs_vue
 
-    volumes:
-      - vue_build:/usr/share/nginx/html
-    networks:
-      - networks_talklabs
-  postgres:
-    image: postgres:latest
-    container_name: talklabs_postgres_database
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    ports:
+      - "5433:5432"
+    container_name: talklabs_database
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -57,14 +43,13 @@ services:
       retries: 5
       start_period: 60s
     volumes:
-      - postgres_data:/var/lib/postgresql/data:rw
+      - database_data:/var/lib/postgresql/data:rw
+      - ./docker/db/data:/var/lib/postgresql/data:rw
     networks:
       - networks_talklabs
 
 volumes:
-  postgres_data:
-  vue_build:
-  symfony_app:
+  database_data:
 
 networks:
   networks_talklabs:

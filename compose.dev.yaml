@@ -2,25 +2,24 @@ services:
   nginx:
     build:
       context: ./docker/nginx
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.dev
     container_name: talklabs_nginx
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
-      - vue_build:/usr/share/nginx/html:ro
-      - symfony_app:/var/www/html:ro
+      - vue_build:/usr/share/nginx/html:ro # Standard nginx
+      - symfony_app:/var/www/html:ro # Partage des fichiers Symfony avec PHP
     depends_on:
       - php
-      - vuejs
     networks:
       - networks_talklabs
-    restart: unless-stopped
-
   php:
     build:
-      context: .
-      dockerfile: docker/php/Dockerfile.prod
+      context: ./
+      dockerfile: docker/php/Dockerfile.dev
     container_name: talklabs_php
+    volumes:
+      - symfony_app:/var/www/html # Volume pour partager avec nginx
     depends_on:
       - postgres
     networks:
@@ -30,26 +29,20 @@ services:
       APP_ENV: ${APP_ENV}
       LEXIK_JWT_PASSPHRASE: ${LEXIK_JWT_PASSPHRASE}
       APP_2FA_KEY: ${APP_2FA_KEY}
-    volumes:
-      - symfony_app:/var/www/html
-    restart: unless-stopped
-
   vuejs:
     build:
       context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
-      dockerfile: Dockerfile.dev
       args:
-        - VITE_API_URL=https://talklab.fr/api
-        - VITE_BASE_URL=https://talklab.fr
-        - VITE_API_2FA_URL=https://talklab.fr/twofactor
-        - NODE_ENV=production
+        - VITE_API_URL=http://localhost/api
+        - VITE_BASE_URL=http://localhost
+        - VITE_API_2FA_URL=http://localhost/twofactor
+        - NODE_ENV=development
     container_name: talklabs_vue
+
     volumes:
       - vue_build:/usr/share/nginx/html
     networks:
       - networks_talklabs
-    restart: unless-stopped
-
   postgres:
     image: postgres:latest
     container_name: talklabs_postgres_database
@@ -68,7 +61,6 @@ services:
       - postgres_data:/var/lib/postgresql/data:rw
     networks:
       - networks_talklabs
-    restart: unless-stopped
 
 volumes:
   postgres_data:
