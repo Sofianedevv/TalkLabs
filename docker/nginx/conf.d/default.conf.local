@@ -24,6 +24,12 @@ server {
         try_files $uri $uri/ /app/index.html;
     }
 
+    location /uploads/ {
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' '*' always;
+    }
+
     location ~ \.php$ {
         return 404;
     }
