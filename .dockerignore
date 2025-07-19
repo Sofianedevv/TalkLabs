@@ -1,0 +1,31 @@
+# Dossiers de cache et logs
+var/cache/*
+var/log/*
+var/sessions/*
+
+# Dossiers de développement
+node_modules
+.git
+.gitignore
+
+# Fichiers Docker
+docker/
+compose*.yaml
+Dockerfile*
+
+# Dossiers de tests
+tests/
+
+# Fichiers temporaires
+*.tmp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

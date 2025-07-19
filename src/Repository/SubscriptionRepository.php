@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Subscription;
+use App\Enum\SubsciptionStatusEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,35 @@ class SubscriptionRepository extends ServiceEntityRepository
         parent::__construct($registry, Subscription::class);
     }
 
-//    /**
-//     * @return Subscription[] Returns an array of Subscription objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Count active subscriptions
+     */
+    public function countActiveSubscriptions(): int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->andWhere('s.status = :status')
+            ->setParameter('status', SubsciptionStatusEnum::ACTIVE)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-//    public function findOneBySomeField($value): ?Subscription
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Get conversion rate (simplified calculation)
+     */
+    public function getConversionRate(): float
+    {
+        $totalSubscriptions = $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $activeSubscriptions = $this->countActiveSubscriptions();
+
+        if ($totalSubscriptions == 0) {
+            return 0.0;
+        }
+
+        return round(($activeSubscriptions / $totalSubscriptions) * 100, 1);
+    }
 }

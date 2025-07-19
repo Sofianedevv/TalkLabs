@@ -49,4 +49,10 @@ LEXIK_JWT_PASSPHRASE=yourSecretSetence
 APP_2FA_KEY=cledechiffrementAES-256
 MAILER_DSN=null://null
 ````
+
+### Commande docker importante 
+````
+docker system prune -a --volumes -f
+docker compose exec php php bin/console app:create-admin admin@talklabs.com 'Admin User' 'proute'"
+````
 Copyright © 2024 [Arthur Brouard, Sid-Ahmed ainsi que Sofiane Chadili]

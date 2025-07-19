@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.3.21RC1-fpm-bullseye
 
 RUN apt-get update && apt-get install -y \
     libpq-dev \
@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     sodium
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer require hwi/oauth-bundle:^2.0
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs

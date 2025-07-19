@@ -8,7 +8,6 @@ use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
 use App\Service\TwoFactorService;
 use Doctrine\ORM\EntityManagerInterface;
-use Dom\Entity;
 use Google\Client as GoogleClient;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
@@ -19,11 +18,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\Uid\Uuid;
 
 #[Route('/api', name: 'app_')]
 class AuthController extends AbstractController
@@ -149,7 +145,7 @@ class AuthController extends AbstractController
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
-                ->withExpires(new \DateTime('+10 minutes'))
+                ->withExpires(new \DateTime('+1 hour'))
                 ->withPath('/')
                 ->withSecure(false)
                 ->withHttpOnly(true)
@@ -170,6 +166,7 @@ class AuthController extends AbstractController
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
                     'username' => $user->getUsername(),
+                    'role' => $user->getRole(),
                     'isTwofactorEnabled' => $user->isTwoFactorEnabled()
 
                 ]
@@ -204,6 +201,7 @@ class AuthController extends AbstractController
                     'email' => $user->getEmail(),
                     'username' => $user->getUsername(),
                     'avatarUrl' => $user->getAvatarUrl(),
+                    'role' => $user->getRole(),
                     'isTwofactorEnabled' => $user->isTwoFactorEnabled()
                 ]
             ]);
@@ -233,7 +231,7 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['id_token'])) {
-            return $this->json(['message' => 'Access token manquant'], Response::HTTP_BAD_REQUEST);     
+            return $this->json(['message' => 'Access token manquant'], Response::HTTP_BAD_REQUEST);
         }
 
         $idToken = $data['id_token'];
@@ -261,7 +259,7 @@ class AuthController extends AbstractController
 
             $randomPassword = bin2hex(random_bytes(20));
             $hashedPassword = $passwordHasher->hashPassword($user, $randomPassword);
-            $user->setPassword($hashedPassword); 
+            $user->setPassword($hashedPassword);
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -270,7 +268,7 @@ class AuthController extends AbstractController
             $token = $jwt->create($user);
             $refreshToken = $refreshTokenService->createRefreshToken($user);
 
-            
+
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
@@ -302,7 +300,7 @@ class AuthController extends AbstractController
             $response->headers->setCookie($refreshTokenCookie);
 
             return $response;
-        
+
 
     }
 
