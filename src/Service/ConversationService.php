@@ -112,12 +112,12 @@ class ConversationService
         if(count($categories) === 0) {
             throw new \RuntimeException('Aucune catégorie trouvé');
         }
-        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $categories);
+        $updatedConversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $categories);
 
-        $this->em->persist($conversation);
+        $this->em->persist($updatedConversation);
         $this->em->flush();
 
-        $this->eventDispatcher->dispatch(new ConversationEditedEvent($conversation), ConversationEditedEvent::NAME);
+        $this->eventDispatcher->dispatch(new ConversationEditedEvent($updatedConversation), ConversationEditedEvent::NAME);
 
         return true;
     }

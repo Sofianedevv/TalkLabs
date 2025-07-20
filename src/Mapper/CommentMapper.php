@@ -63,11 +63,12 @@ class CommentMapper {
         $dto->setCreatedAt($comment->getCreatedAt()->format('Y-m-d H:i:s'));
         $dto->setConversationId($comment->getConversation()->getId());
         $dto->setStatus($comment->getStatus()->value);
-    $dto->setPublisher([
-        'id' => $comment->getPublisher()->getId(),
-        'name' => $comment->getPublisher()->getUsername(),
-        'avatarUrl' => $comment->getPublisher()->getAvatarUrl(),
-    ]);
+        $dto->setPublisher([
+            'id' => $comment->getPublisher()->getId(),
+            'name' => $comment->getPublisher()->getUsername(),
+            'avatarUrl' => $comment->getPublisher()->getAvatarUrl(),
+            'username' => $comment->getPublisher()->getusername(),
+        ]);
         if ($comment->getParentComment()) {
             $dto->setParentCommentId($comment->getParentComment()->getId());
         }

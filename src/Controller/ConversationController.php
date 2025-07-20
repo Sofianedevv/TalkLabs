@@ -156,7 +156,7 @@ final class ConversationController extends AbstractController
     #[Route('/most-liked-conversations', name: 'most-liked-conversations', methods: ['GET'])]
     public function getMostLikedConversations(ConversationService $conversationService): JsonResponse {
         try {
-            $mostLikedConvs = $this->json($conversationService->getMostLikedPublicConversation(5));
+            $mostLikedConvs = $this->json($conversationService->getMostLikedPublicConversation(3));
             return $this->json($mostLikedConvs);
         } catch (\RuntimeException $e){
             return $this->json(['error' => $e->getMessage()], 400);
