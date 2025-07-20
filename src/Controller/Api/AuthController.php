@@ -152,7 +152,7 @@ class AuthController extends AbstractController
                     ->withValue($token)
                     ->withExpires(new \DateTime('+1 hour'))
                     ->withPath('/')
-                    ->withSecure(false)
+                    ->withSecure()
                     ->withHttpOnly(true)
                     ->withSameSite('Strict');
 
@@ -160,7 +160,7 @@ class AuthController extends AbstractController
                     ->withValue($refreshToken->getRefreshToken())
                     ->withExpires(new \DateTime('+2 days'))
                     ->withPath('/')
-                    ->withSecure(false)
+                    ->withSecure()
                     ->withHttpOnly(true)
                     ->withSameSite('Strict');
 
@@ -292,7 +292,7 @@ class AuthController extends AbstractController
                 ->withValue($token)
                 ->withExpires(new \DateTime('+1 minutes'))
                 ->withPath('/')
-                ->withSecure(false)
+                ->withSecure()
                 ->withHttpOnly(true)
                 ->withSameSite('Strict');
 
@@ -300,7 +300,7 @@ class AuthController extends AbstractController
                 ->withValue($refreshToken->getRefreshToken())
                 ->withExpires(new \DateTime('+2 days'))
                 ->withPath('/')
-                ->withSecure(false)
+                ->withSecure()
                 ->withHttpOnly(true)
                 ->withSameSite('Strict');
 
