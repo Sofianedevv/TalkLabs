@@ -20,26 +20,18 @@ WORKDIR /var/www/html
 # Copier les fichiers de configuration d'abord
 COPY composer.json composer.lock symfony.lock ./
 
-# Installer les dépendances Composer
-RUN composer install --optimize-autoloader --no-dev --no-scripts
+# Installer les dépendances sans scripts
+RUN composer install --no-scripts --no-autoloader
 
 # Copier tout le reste du code
 COPY . .
+RUN composer require hwi/oauth-bundle --no-scripts
 
-# Configuration de base
-RUN cp .env.prod.vps .env \
-    && mkdir -p var/cache var/log config/jwt
+# Générer l'autoloader et exécuter les scripts maintenant que tout est copié
+RUN composer dump-autoload --optimize && composer run-script post-install-cmd
 
-# Permissions de base
-RUN chown -R www-data:www-data var/ \
-    && chmod -R 755 var/
-
-# Générer les clés JWT (peut échouer, on continue quand même)
-RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || echo "JWT keypair generation failed, will be handled by deploy script"
-
-# Permissions finales pour JWT (si les clés existent)
-RUN if [ -d "config/jwt" ]; then \
-    chown -R www-data:www-data config/jwt/ && \
-    chmod -R 644 config/jwt/*.pem 2>/dev/null || true && \
-    chmod 600 config/jwt/private.pem 2>/dev/null || true; \
-    fi
+# Assurer les bonnes permissions pour var/
+RUN chown -R www-data:www-data /var/www/html/var && \
+    chmod -R 755 /var/www/html/var && \
+    chown -R www-data:www-data /var/www/html/config && \
+    chmod -R 755 /var/www/html/config
