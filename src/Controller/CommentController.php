@@ -66,7 +66,7 @@ final class CommentController extends AbstractController
             $comment = $commentService->editComment($comment->getId(), $dto);
             return $this->json([
                 'comment' => $comment,
-                'message' => 'Commentaire ajouté avec succès'
+                'message' => 'Commentaire mis à jour avec succès'
             ]);
         } catch (\RuntimeException $e) {
             return $this->json(['error' => $e->getMessage()], 400);
@@ -99,9 +99,8 @@ final class CommentController extends AbstractController
         }
     }
 
-
-    #[Route('/pending-comment', name: 'pending_comment')]
     #[IsGranted('ROLE_ADMIN')]
+    #[Route('/pending-comment', name: 'pending_comment')]
     public function getPendingCommentReport(CommentService $commentService): JsonResponse
     {
 
@@ -112,9 +111,8 @@ final class CommentController extends AbstractController
         }
     }
 
-
-    #[Route('/validate-comment/{commentId}', name: 'validate')]
     #[IsGranted('ROLE_ADMIN')]
+    #[Route('/validate-comment/{commentId}', name: 'validate')]
     public function validateComment(CommentService $commentService, $commentId): JsonResponse
     {
         try {
@@ -124,9 +122,9 @@ final class CommentController extends AbstractController
             return $this->json(['error' => $e->getMessage()], 400);
         }
     }
-
-    #[Route('/reject-comment/{commentId}', name: 'reject')]
+    
     #[IsGranted('ROLE_ADMIN')]
+    #[Route('/reject-comment/{commentId}', name: 'reject')]
     public function rejectComment(CommentService $commentService, $commentId): JsonResponse
     {
 

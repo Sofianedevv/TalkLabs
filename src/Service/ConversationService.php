@@ -122,12 +122,12 @@ class ConversationService
         if(count($categories) === 0) {
             throw new \RuntimeException('Aucune catégorie trouvé');
         }
-        $conversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $categories);
+        $updatedConversation = $this->conversationMapper->dtoToConversationEdit($dto, $conversation, $creator, $categories);
 
-        $this->em->persist($conversation);
+        $this->em->persist($updatedConversation);
         $this->em->flush();
 
-        $this->eventDispatcher->dispatch(new ConversationEditedEvent($conversation), ConversationEditedEvent::NAME);
+        $this->eventDispatcher->dispatch(new ConversationEditedEvent($updatedConversation), ConversationEditedEvent::NAME);
 
         return true;
     }
@@ -178,6 +178,10 @@ class ConversationService
 
         $conversations = $this->conversationRepository->findBy(['creator' => $user]);
         return $this->conversationToDTO($conversations);
+    }
+
+    public function getMostLikedPublicConversation(int $limit) : array {
+        return $this->conversationToDTO($this->conversationRepository->findMostLikedPublicConversation($limit));
     }
 
     public function uploadMedia(Request $request) : array {

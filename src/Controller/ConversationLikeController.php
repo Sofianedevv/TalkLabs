@@ -69,8 +69,6 @@ final class ConversationLikeController extends AbstractController
     ): JsonResponse {
        try {    
         
-        
-        
             return $this->json($conversationLikeService->getAccountsLiked($conversation), Response::HTTP_OK);
         } catch (\RuntimeException $e) {
             return $this->json(['error' => $e->getMessage()], 400);

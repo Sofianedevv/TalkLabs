@@ -80,11 +80,11 @@ class CommentService
         if (!$comment) {
             throw new \Exception("Commentaire introuvable");
         }
-        $comment = $this->commentMapper->editDtoToComment($dto, $comment);
-        $this->em->persist($comment);
+        $updatedComment = $this->commentMapper->editDtoToComment($dto, $comment);
+        $this->em->persist($updatedComment);
         $this->em->flush();
 
-        return $this->commentMapper->commentToReadDTO($comment);
+        return $this->commentMapper->commentToReadDTO($updatedComment);
     }
 
     public function deleteComment($id): void
@@ -128,7 +128,14 @@ class CommentService
 
     public function getPendingComments(): array
     {
-        return $this->commentRepository->findPendingComments();
+        $comments = $this->commentRepository->findPendingComments();
+        $commentDTOs = [];
+
+        foreach ($comments as $comment) {
+            $commentDTOs[] = $this->commentMapper->commentToReadDTO($comment);
+        }
+
+        return $commentDTOs;
     }
 
 

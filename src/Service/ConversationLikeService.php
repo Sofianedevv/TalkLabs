@@ -69,15 +69,19 @@ class ConversationLikeService {
 
     public function getAccountsLiked(Conversation $conversation) : array {
         $likes = $this->conversationLikeRepository->findLikesByConversation($conversation) ?? [];
+        $accounts = [];
 
-        return array_map(function ($like) {
-            return [
-                'id' => $like->getAccount()->getId(),
-                'username'=> $like->getAccount()->getUsername(),
+        foreach ($likes ?? [] as $like) {
+            $account = $like->getAccount();
+
+            $accounts[] = [
+                'id'       => $account->getId(),
+                'username' => $account->getUsername(),
             ];
+        }
 
-    }, $likes);
-}
+        return $accounts;
+    }
 
     public function countLikes(Conversation $conversation) : int {
         return $this->conversationLikeRepository->countlikesByConversations($conversation->getId());

@@ -135,4 +135,18 @@ class ConversationRepository extends ServiceEntityRepository
                     ->getQuery()
                     ->getOneOrNullResult();
     }
+
+    public function findMostLikedPublicConversation(): array {
+        return $this->createQueryBuilder('c')
+                    ->leftJoin('c.conversationLikes', 'cl')
+                    ->andWhere('c.isPublic = :isPublic')
+                    ->setParameter('isPublic', true)
+                    ->groupBy('c.id')
+                    ->orderBy('COUNT(cl.id)', 'DESC')
+                    ->setMaxResults(10)
+                    ->getQuery()
+                    ->getResult();
+    }
+
+
 }
