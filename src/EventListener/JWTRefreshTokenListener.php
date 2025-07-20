@@ -117,7 +117,7 @@ class JWTRefreshTokenListener {
                 ->withValue($newJwt)
                 ->withExpires(new \DateTime('+1 hour'))
                 ->withPath('/')
-                ->withSecure(false)
+                ->withSecure()
                 ->withHttpOnly(true)
                 ->withSameSite('Strict');
 
@@ -125,7 +125,7 @@ class JWTRefreshTokenListener {
                 ->withValue($newRefreshToken)
                 ->withExpires(new \DateTime('+2 days'))
                 ->withPath('/')
-                ->withSecure(false) 
+                ->withSecure()
                 ->withHttpOnly(true)
                 ->withSameSite('Strict');
 
