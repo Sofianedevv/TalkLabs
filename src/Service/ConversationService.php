@@ -9,6 +9,7 @@ use App\DTO\ConversationReadDTO;
 use App\Entity\Conversation;
 use App\Entity\Accounts;
 use App\Enum\ConversationStatusEnum;
+use App\Enum\SubsciptionStatusEnum;
 use App\Event\Conversation\ConversationCreatedEvent;
 use App\Event\Conversation\ConversationDeletedEvent;
 use App\Event\Conversation\ConversationEditedEvent;
@@ -105,6 +106,15 @@ class ConversationService
         }
         if ($conversation->getCreator()->getId() !== $creator->getId()) {
             throw new \RuntimeException('Vous n\'êtes pas autorisé à modifier cette conversaiton');
+        }
+
+        if ($dto->getStatus() === 'published' && $dto->getIsPublic()) {
+            $currentSubscription = $creator->getCurrentSubscription();
+            $hasActiveSubscription = $currentSubscription !== null && $currentSubscription->getStatus() === SubsciptionStatusEnum::ACTIVE;
+            
+            if (!$hasActiveSubscription) {
+                throw new \RuntimeException('Un abonnement actif est requis pour publier une conversation');
+            }
         }
 
         $categories = $this->categoryRepository->findBy(['id' => $dto->getCategoriesId()]);
