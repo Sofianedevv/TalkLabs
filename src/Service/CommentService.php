@@ -98,8 +98,20 @@ class CommentService
         if (!$comment) {
             throw new \Exception("Commentaire introuvable");
         }
-        $this->em->remove($comment);
+        
+        $this->deleteCommentWithChildren($comment);
         $this->em->flush();
+    }
+
+    private function deleteCommentWithChildren($comment): void
+    {
+        $childComments = $comment->getChildComments();
+        
+        foreach ($childComments as $childComment) {
+            $this->deleteCommentWithChildren($childComment);
+        }
+        
+        $this->em->remove($comment);
     }
 
     public function reportComment($commentId): void

@@ -159,62 +159,17 @@ class SubscriptionController extends AbstractController
         }
     }
 
-    #[Route('/change/{planId}', name: 'api_subscription_change', methods: ['POST'])]
+    // Route désactivée - changement d'abonnement non autorisé
+    // #[Route('/change/{planId}', name: 'api_subscription_change', methods: ['POST'])]
+    /*
     public function changeSubscription(
         int $planId,
         PlanRepository $planRepository,
         EntityManagerInterface $entityManager
     ): JsonResponse {
-        try {
-            $user = $this->getUser();
-            if (!$user instanceof Accounts) {
-                return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
-            }
-
-            $newPlan = $planRepository->find($planId);
-            if (!$newPlan) {
-                return $this->json(['message' => 'Plan non trouvé'], Response::HTTP_NOT_FOUND);
-            }
-
-            $currentSubscription = $user->getCurrentSubscription();
-            if (!$currentSubscription) {
-                return $this->json(['message' => 'Aucun abonnement actif trouvé'], Response::HTTP_NOT_FOUND);
-            }
-
-            $currentSubscription->setStatus(SubsciptionStatusEnum::CANCELED);
-            $entityManager->persist($currentSubscription);
-
-            $newSubscription = new Subscription();
-            $newSubscription->setPlan($newPlan);
-            $newSubscription->setStatus(SubsciptionStatusEnum::ACTIVE);
-            $newSubscription->setDuration(30);
-            $newSubscription->addUser($user);
-
-            $entityManager->persist($newSubscription);
-            
-            $user->setCurrentSubscription($newSubscription);
-            $entityManager->persist($user);
-            
-            $entityManager->flush();
-
-            return $this->json([
-                'message' => 'Abonnement modifié avec succès',
-                'subscription' => [
-                    'id' => $newSubscription->getId(),
-                    'status' => $newSubscription->getStatus()->value,
-                    'plan' => [
-                        'name' => $newPlan->getName(),
-                        'price' => $newPlan->getPrice()
-                    ]
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return $this->json([
-                'message' => 'Erreur lors du changement d\'abonnement',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->json(['message' => 'Changement d\'abonnement non autorisé'], Response::HTTP_FORBIDDEN);
     }
+    */
 
     #[Route('/cancel', name: 'api_subscription_cancel', methods: ['POST'])]
     public function cancelSubscription(EntityManagerInterface $entityManager): JsonResponse

@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Accounts;
+use App\Enum\SubsciptionStatusEnum;
 use App\Repository\AccountsRepository;
 use App\Repository\RefreshTokenRepository;
 use App\Service\RefreshTokenService;
@@ -193,6 +194,16 @@ class AuthController extends AbstractController
              if(!$user instanceof Accounts) {
                 return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
              }
+
+            $currentSubscription = $user->getCurrentSubscription();
+            error_log('DEBUG /me - currentSubscription: ' . ($currentSubscription ? 'exists' : 'null'));
+            if ($currentSubscription) {
+                error_log('DEBUG /me - subscription status: ' . $currentSubscription->getStatus()->value);
+            }
+            $hasSubscription = $currentSubscription !== null && $currentSubscription->getStatus() === SubsciptionStatusEnum::ACTIVE;
+            $subscriptionStatus = $currentSubscription ? $currentSubscription->getStatus()->value : null;
+            error_log('DEBUG /me - hasSubscription: ' . ($hasSubscription ? 'true' : 'false'));
+            error_log('DEBUG /me - subscriptionStatus: ' . ($subscriptionStatus ?? 'null'));
             
             return $this->json([
                 'user' => [
@@ -202,7 +213,9 @@ class AuthController extends AbstractController
                     'username' => $user->getUsername(),
                     'avatarUrl' => $user->getAvatarUrl(),
                     'role' => $user->getRole(),
-                    'isTwofactorEnabled' => $user->isTwoFactorEnabled()
+                    'isTwofactorEnabled' => $user->isTwoFactorEnabled(),
+                    'hasSubscription' => $hasSubscription,
+                    'subscriptionStatus' => $subscriptionStatus
                 ]
             ]);
         } catch (\Exception $e) {
