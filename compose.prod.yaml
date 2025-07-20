@@ -37,11 +37,12 @@ services:
   vuejs:
     build:
       context: https://github.com/LuzBoger/talk-lab-front.git#simulateur
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
       args:
         - VITE_API_URL=https://talklab.fr/api
         - VITE_BASE_URL=https://talklab.fr
         - VITE_API_2FA_URL=https://talklab.fr/twofactor
+        - VITE_GOOGLE_CLIENT_ID=523525147188-89ftltikud192it0r1iuu4sq024qiqo1.apps.googleusercontent.com
         - NODE_ENV=production
     container_name: talklabs_vue
     volumes:

@@ -27,7 +27,7 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 COPY . .
 
 # Configuration de base
-RUN cp .env.prod .env \
+RUN cp .env.prod.vps .env \
     && mkdir -p var/cache var/log config/jwt
 
 # Permissions de base

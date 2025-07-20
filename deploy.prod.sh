@@ -9,29 +9,34 @@ echo "🚀 Déploiement de TalkLabs..."
 DOCKER_CONTEXT=$(docker context show)
 echo "📍 Contexte Docker actuel : $DOCKER_CONTEXT"
 
-# Utiliser le fichier .env approprié selon le contexte
-if [ "$DOCKER_CONTEXT" = "default" ]; then
-    echo "📝 Déploiement en local - utilisation de .env.dev"
-    if [ -f ".env.dev" ]; then
-        cp .env.dev .env
-    fi
-    COMPOSE_FILE="compose.yaml"
-    TEST_URL="http://localhost:8080"
-else
-    echo "📝 Déploiement sur VPS - utilisation de .env.prod.vps"
-    if [ -f ".env.prod.vps" ]; then
-        cp .env.prod.vps .env
-    fi
-    COMPOSE_FILE="compose.prod.yaml"
-    TEST_URL="https://talklab.fr"
+echo "📝 Déploiement sur VPS - utilisation de .env.prod.vps"
+if [ -f ".env.prod.vps" ]; then
+    cp .env.prod.vps .env
 fi
-
+COMPOSE_FILE="compose.prod.yaml"
+TEST_URL="https://talklab.fr"
 # Construire et démarrer les services
 echo "📦 Construction des images Docker..."
 docker-compose -f $COMPOSE_FILE build --no-cache
 
 echo "🔄 Arrêt des anciens conteneurs..."
 docker-compose -f $COMPOSE_FILE down
+
+echo "🧹 Nettoyage des conteneurs arrêtés..."
+docker container prune -f
+
+echo "🧹 Nettoyage des images inutilisées..."
+docker image prune -a -f
+
+echo "🧹 Nettoyage des réseaux inutilisés..."
+docker network prune -f
+
+echo "🧹 Nettoyage des volumes inutilisés..."
+docker volume prune -f
+
+# Suppression des volumes Vue.js si besoin
+echo "🧹 Suppression des volumes Vue.js..."
+docker volume rm $(docker volume ls -q | grep vue_build)
 
 echo "▶️ Démarrage des nouveaux conteneurs..."
 docker-compose -f $COMPOSE_FILE up -d
@@ -47,12 +52,13 @@ docker-compose -f $COMPOSE_FILE exec -T php head -5 .env
 
 # Corriger les permissions si nécessaire
 echo "🔧 Correction des permissions de cache et JWT..."
-docker-compose -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/var/
-docker-compose -f $COMPOSE_FILE exec -T php chmod -R 755 /var/www/html/var/
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/var/ 2>/dev/null || echo "⚠️ Permissions var/ non modifiées"
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php chmod -R 755 /var/www/html/var/ 2>/dev/null || echo "⚠️ Permissions var/ non modifiées"
+
 # Permissions pour les clés JWT
-docker-compose -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/config/jwt/ 2>/dev/null || echo "ℹ️  Dossier JWT non trouvé, génération des clés..."
-docker-compose -f $COMPOSE_FILE exec -T php chmod 600 /var/www/html/config/jwt/private.pem 2>/dev/null || echo "ℹ️  Clé privée JWT à générer"
-docker-compose -f $COMPOSE_FILE exec -T php chmod 644 /var/www/html/config/jwt/public.pem 2>/dev/null || echo "ℹ️  Clé publique JWT à générer"
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/config/jwt/ 2>/dev/null || echo "ℹ️ Dossier JWT non trouvé, génération des clés..."
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php chmod 600 /var/www/html/config/jwt/private.pem 2>/dev/null || echo "ℹ️ Clé privée JWT à générer"
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php chmod 644 /var/www/html/config/jwt/public.pem 2>/dev/null || echo "ℹ️ Clé publique JWT à générer"
 
 # Générer les clés JWT si nécessaire
 echo "🔐 Génération des clés JWT si nécessaire..."
@@ -88,23 +94,13 @@ fi
 echo "🔧 Exécution des migrations..."
 docker-compose -f $COMPOSE_FILE exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
-# Corriger les permissions avant le cache
-echo "🔐 Correction des permissions..."
-docker-compose -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/var/
-docker-compose -f $COMPOSE_FILE exec -T php chmod -R 755 /var/www/html/var/
-
 # Vider le cache
 echo "🧹 Nettoyage du cache..."
-docker-compose -f $COMPOSE_FILE exec -T php php bin/console cache:clear --env=prod
-
-# Corriger les permissions du cache généré
-echo "🔐 Correction finale des permissions cache..."
-docker-compose -f $COMPOSE_FILE exec -T php chown -R www-data:www-data /var/www/html/var/cache/
-docker-compose -f $COMPOSE_FILE exec -T php chmod -R 755 /var/www/html/var/cache/
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php php bin/console cache:clear --env=prod
 
 # Charger les données de test (fixtures)
 echo "📊 Chargement des données de test..."
-docker-compose -f $COMPOSE_FILE exec -T php php bin/console hautelook:fixtures:load --no-interaction --env=prod || echo "⚠️  Chargement des fixtures échoué ou pas disponible"
+docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE exec -T php php bin/console hautelook:fixtures:load --no-interaction --env=prod || echo "⚠️  Chargement des fixtures échoué ou pas disponible"
 
 echo "✅ Déploiement terminé avec succès!"
 echo "🌐 L'application est accessible sur $TEST_URL"
@@ -123,3 +119,20 @@ if curl -s -f $TEST_URL/api/get-conversations-public > /dev/null; then
 else
     echo "⚠️  L'API ne répond pas"
 fi
+
+echo ""
+echo "📋 État des conteneurs:"
+docker-compose -f $COMPOSE_FILE ps
+echo ""
+echo "🔗 URLs utiles:"
+echo "   - Site web: $TEST_URL"
+echo "   - API: $TEST_URL/api"
+echo "   - Documentation API: $TEST_URL/api/doc (si disponible)"
+echo ""
+echo "📝 Commandes utiles:"
+echo "   - Voir les logs: docker-compose -f $COMPOSE_FILE logs -f"
+echo "   - Logs PHP: docker-compose -f $COMPOSE_FILE logs -f php"
+echo "   - Logs PostgreSQL: docker-compose -f $COMPOSE_FILE logs -f postgres"
+echo "   - Arrêter: docker-compose -f $COMPOSE_FILE down"
+echo "   - Redémarrer: docker-compose -f $COMPOSE_FILE restart"
+echo "   - Accéder au conteneur PHP: docker-compose -f $COMPOSE_FILE exec php bash"
