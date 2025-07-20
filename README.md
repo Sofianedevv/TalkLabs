@@ -54,5 +54,13 @@ MAILER_DSN=null://null
 ````
 docker system prune -a --volumes -f
 docker compose exec php php bin/console app:create-admin admin@talklabs.com 'Admin User' 'proute'"
+chown -R www-data:www-data /var/www/html/public/uploads/avatar/
+chmod -R 775 /var/www/html/public/uploads/avatar/
+
+chown -R www-data:www-data /var/www/html/public/uploads/audios/
+chmod -R 775 /var/www/html/public/uploads/audios/
+
+chown -R www-data:www-data /var/www/html/public/uploads/images/
+chmod -R 775 /var/www/html/public/uploads/images/
 ````
 Copyright © 2024 [Arthur Brouard, Sid-Ahmed ainsi que Sofiane Chadili]
