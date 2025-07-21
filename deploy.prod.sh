@@ -31,10 +31,6 @@ docker volume prune -f
 echo "📦 Construction des images Docker..."
 docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE build --pull --no-cache
 
-# Suppression des volumes Vue.js si besoin
-echo "🧹 Suppression des volumes Vue.js..."
-docker volume rm $(docker volume ls -q | grep vue_build)
-
 echo "▶️ Démarrage des nouveaux conteneurs..."
 docker-compose --env-file .env.prod.vps -f $COMPOSE_FILE up -d
 

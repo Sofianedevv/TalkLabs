@@ -54,9 +54,15 @@ MAILER_DSN=null://null
 ````
 docker system prune -a --volumes -f
 docker compose exec php php bin/console app:create-admin admin@talklabs.com 'Admin User' 'proute'"
+psql -U postgres -d TalkLabs
+chmod -R 777 .
+UPDATE accounts SET role = '["ROLE_ADMIN"]' WHERE email = 'admin@talklab.com';
+docker-compose -f compose.prod.yaml exec postgres bash
+docker-compose -f compose.prod.yaml exec php bash
+
 chown -R www-data:www-data /var/www/html/public/uploads/avatar/
 chmod -R 775 /var/www/html/public/uploads/avatar/
-
+chmod -R 777 .
 chown -R www-data:www-data /var/www/html/public/uploads/audios/
 chmod -R 775 /var/www/html/public/uploads/audios/
 
