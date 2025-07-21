@@ -31,6 +31,8 @@ services:
       LEXIK_JWT_PASSPHRASE: ${LEXIK_JWT_PASSPHRASE}
       APP_2FA_KEY: ${APP_2FA_KEY}
       APP_SECRET: ${APP_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
     volumes:
       - symfony_app:/var/www/html
     restart: unless-stopped
