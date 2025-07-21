@@ -31,6 +31,9 @@ services:
       APP_ENV: ${APP_ENV}
       LEXIK_JWT_PASSPHRASE: ${LEXIK_JWT_PASSPHRASE}
       APP_2FA_KEY: ${APP_2FA_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      FRONTEND_URL: https://talklab.fr
   vuejs:
     build:
       context: https://github.com/LuzBoger/talk-lab-front.git#simulateur

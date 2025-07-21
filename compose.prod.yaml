@@ -33,6 +33,7 @@ services:
       APP_SECRET: ${APP_SECRET}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      FRONTEND_URL: https://talklab.fr
     volumes:
       - symfony_app:/var/www/html
     restart: unless-stopped

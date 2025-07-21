@@ -17,6 +17,7 @@ class StripeService
 {
     private string $secretKey;
     private string $publishableKey;
+    private string $frontendUrl;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -25,6 +26,7 @@ class StripeService
     ) {
         $this->secretKey = $params->get('stripe_secret_key');
         $this->publishableKey = $params->get('stripe_publishable_key');
+        $this->frontendUrl = $params->get('app.frontend_url');
         $this->logger = $logger;
         
         Stripe::setApiKey($this->secretKey);
@@ -49,8 +51,8 @@ class StripeService
                     ],
                 ],
                 'mode' => 'subscription',
-                'success_url' => $successUrl ?: 'http://localhost:5173/my-subscription?success=true&session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => $cancelUrl ?: 'http://localhost:5173/subscription/plans?canceled=true',
+                'success_url' => $successUrl ?: $this->frontendUrl . '/my-subscription?success=true&session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => $cancelUrl ?: $this->frontendUrl . '/subscription/plans?canceled=true',
             ];
 
             // Si nous avons un customer ID, l'ajouter à la session
