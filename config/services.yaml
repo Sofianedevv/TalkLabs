@@ -7,6 +7,7 @@ parameters:
     app.2fa_key: '%env(APP_2FA_KEY)%'
     stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
     stripe_publishable_key: '%env(STRIPE_PUBLISHABLE_KEY)%'
+    app.frontend_url: '%env(FRONTEND_URL)%'
 services:
     # default configuration for services in *this* file
     _defaults:

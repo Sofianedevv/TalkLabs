@@ -17,16 +17,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Route('/api/stripe')]
 class StripeController extends AbstractController
 {
+    private string $frontendUrl;
+
     public function __construct(
         private StripeService $stripeService,
         private PlanRepository $planRepository,
         private SubscriptionRepository $subscriptionRepository,
-        private EntityManagerInterface $entityManager
-    ) {}
+        private EntityManagerInterface $entityManager,
+        ParameterBagInterface $params
+    ) {
+        $this->frontendUrl = $params->get('app.frontend_url');
+    }
 
     #[Route('/create-checkout-session', name: 'stripe_create_checkout_session', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
@@ -56,8 +62,8 @@ class StripeController extends AbstractController
             $session = $this->stripeService->createCheckoutSession(
                 $this->getStripePriceId($plan), 
                 $customer->id,
-                'http://localhost:5173/my-subscription?success=true&session_id={CHECKOUT_SESSION_ID}',
-                'http://localhost:5173/subscription/plans?canceled=true'
+                $this->frontendUrl . '/my-subscription?success=true&session_id={CHECKOUT_SESSION_ID}',
+                $this->frontendUrl . '/subscription/plans?canceled=true'
             );
 
             return $this->json([
