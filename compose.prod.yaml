@@ -1,8 +1,8 @@
 services:
   nginx:
     build:
-      context: ./docker/nginx
-      dockerfile: Dockerfile.prod
+      context: https://github.com/Sofianedevv/TalkLabs.git#simulateur
+      dockerfile: docker/nginx/Dockerfile.prod
     container_name: talklabs_nginx
     ports:
       - "8080:80"
@@ -18,7 +18,7 @@ services:
 
   php:
     build:
-      context: .
+      context: https://github.com/Sofianedevv/TalkLabs.git#simulateur
       dockerfile: docker/php/Dockerfile.prod
     container_name: talklabs_php
     depends_on:
