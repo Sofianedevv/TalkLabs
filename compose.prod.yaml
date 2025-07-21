@@ -9,7 +9,6 @@ services:
     volumes:
       - vue_build:/usr/share/nginx/html:ro
       - symfony_app:/var/www/html:ro
-      - /home/arthur/TalkLabs:/var/www/html
     depends_on:
       - php
       - vuejs
@@ -33,8 +32,6 @@ services:
       APP_2FA_KEY: ${APP_2FA_KEY}
     volumes:
       - symfony_app:/var/www/html
-      - /home/arthur/TalkLabs:/var/www/html # Montage direct du dossier projet
-
     restart: unless-stopped
 
   vuejs:
