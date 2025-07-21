@@ -24,6 +24,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api', name: 'app_')]
 class AuthController extends AbstractController
