@@ -9,6 +9,7 @@ services:
     volumes:
       - vue_build:/usr/share/nginx/html:ro # Standard nginx
       - symfony_app:/var/www/html:ro # Partage des fichiers Symfony avec PHP
+      - /home/arthur/TalkLabs:/var/www/html:ro # Montage direct du dossier projet
     depends_on:
       - php
     networks:
@@ -20,6 +21,7 @@ services:
     container_name: talklabs_php
     volumes:
       - symfony_app:/var/www/html # Volume pour partager avec nginx
+      - /home/arthur/TalkLabs:/var/www/html # Montage direct du dossier projet
     depends_on:
       - postgres
     networks:
@@ -35,7 +37,7 @@ services:
       args:
         - VITE_API_URL=http://localhost/api
         - VITE_BASE_URL=http://localhost
-        - VITE_API_2FA_URL=http://localhost/twofactor
+        - VITE_API_2FA_URL=http://localhost/api/twofactor
         - VITE_GOOGLE_CLIENT_ID=523525147188-89ftltikud192it0r1iuu4sq024qiqo1.apps.googleusercontent.com
         - NODE_ENV=development
     container_name: talklabs_vue

@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/twofactor', name: 'app_')]
+#[Route('/api/twofactor', name: 'app_')]
 final class TwoFactorController extends AbstractController
 {
 

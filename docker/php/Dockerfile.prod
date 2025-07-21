@@ -23,14 +23,19 @@ COPY composer.json composer.lock symfony.lock ./
 # Installer les dépendances sans scripts
 RUN composer install --no-scripts --no-autoloader
 
-# Copier tout le reste du code
+# Copier tout le reste du code (y compris les entités)
 COPY . .
+
+# Installer le bundle OAuth (si besoin)
 RUN composer require hwi/oauth-bundle --no-scripts
 
 # Générer l'autoloader et exécuter les scripts maintenant que tout est copié
 RUN composer dump-autoload --optimize && composer run-script post-install-cmd
 
-# Assurer les bonnes permissions pour var/
+# Nettoyer le cache Symfony
+RUN rm -rf var/cache/*
+
+# Assurer les bonnes permissions pour var/ et config/
 RUN chown -R www-data:www-data /var/www/html/var && \
     chmod -R 755 /var/www/html/var && \
     chown -R www-data:www-data /var/www/html/config && \
