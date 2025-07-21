@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\DTO\LoginDTO;
 use App\DTO\RegisterDTO;
 use App\Dto\UpdatePasswordDto;
 use App\Entity\Accounts;
@@ -98,16 +97,14 @@ class AuthController extends AbstractController
         }
     }
     
-    #[Route('/login', name: 'login', methods: ['POST', 'OPTIONS'])]
+     #[Route('/login', name: 'login', methods: ['POST', 'OPTIONS'])]
     public function login(
         Request $request, 
         AccountsRepository $accountsRepository,
         UserPasswordHasherInterface $passwordHasher,
         JWTTokenManagerInterface $JWTManager,
         LoggerInterface $logger,
-        RefreshTokenService $refreshTokenService,
-        Serializerinterface $serializer,
-        ValidatorInterface $validator
+        RefreshTokenService $refreshTokenService
     ): JsonResponse {
 
         if ($request->getMethod() === 'OPTIONS') {
@@ -115,71 +112,73 @@ class AuthController extends AbstractController
         }
 
         try {
-                $dto = $serializer->deserialize($request->getContent(), LoginDTO::class, 'json');         
-                $errors = $validator->validate($dto);
-                if (count($errors) > 0) {
-                    $errorMessages = [];
-                    foreach ($errors as $error) {
-                        $errorMessages[$error->getPropertyPath()] = $error->getMessage();
-                    }
-                    return $this->json(['errors' => $errorMessages], Response::HTTP_BAD_REQUEST);
-                }
+            $data = json_decode($request->getContent(), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $this->json([
+                    'message' => 'Erreur de décodage JSON: ' . json_last_error_msg()
+                ], Response::HTTP_BAD_REQUEST);
+            }
             
-                $user = $accountsRepository->findOneBy(['email' => $dto->getEmail()]);
+            if (!isset($data['email']) || !isset($data['password'])) {
+                return $this->json([
+                    'message' => 'Email et mot de passe requis'
+                ], Response::HTTP_BAD_REQUEST);
+            }
             
-                if (!$user || !$passwordHasher->isPasswordValid($user, $dto->getPassword())) {
-                    return $this->json([
-                        'message' => 'Identifiants invalides'
-                    ], Response::HTTP_UNAUTHORIZED);
+            $user = $accountsRepository->findOneBy(['email' => $data['email']]);
+            
+            if (!$user || !$passwordHasher->isPasswordValid($user, $data['password'])) {
+                return $this->json([
+                    'message' => 'Identifiants invalides'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if($user->isTwoFactorEnabled()) {
+                if (empty($data['totpCode'])) {
+                    return $this->json(['message' => 'Code 2FA requis', 'isTwoFactorEnabled' => true], Response::HTTP_OK);
                 }
 
-                if($user->isTwoFactorEnabled()) {
-                    if (empty($dto->getTotp())) {
-                        return $this->json(['message' => 'Code 2FA requis', 'isTwoFactorEnabled' => true], Response::HTTP_OK);
-                    }
-
-                    if(!$this->twoFactorService->validateTotpCodeAfterLogin($user, $dto->getTotp())) {
-                        return $this->json(['message' => 'Code 2FA invalide'], Response::HTTP_UNAUTHORIZED);
-                    }
+                if(!$this->twoFactorService->validateTotpCodeAfterLogin($user, $data['totpCode'])) {
+                    return $this->json(['message' => 'Code 2FA invalide'], Response::HTTP_UNAUTHORIZED);
                 }
-                $token = $JWTManager->create($user);
-                $refreshToken = $refreshTokenService->createRefreshToken($user);
+            }
+            $token = $JWTManager->create($user);
+            $refreshToken = $refreshTokenService->createRefreshToken($user);
 
-                
-                //Si on passe le JWT via un cookie à voir
-                $jwtCookie = Cookie::create('BEARER')
-                    ->withValue($token)
-                    ->withExpires(new \DateTime('+1 hour'))
-                    ->withPath('/')
-                    ->withSecure(false)
-                    ->withHttpOnly(true)
-                    ->withSameSite('Strict');
+            
+            //Si on passe le JWT via un cookie à voir
+            $jwtCookie = Cookie::create('BEARER')
+                ->withValue($token)
+                ->withExpires(new \DateTime('+1 hour'))
+                ->withPath('/')
+                ->withSecure(true)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
 
-                $refreshTokenCookie = Cookie::create('REFRESH_TOKEN')
-                    ->withValue($refreshToken->getRefreshToken())
-                    ->withExpires(new \DateTime('+2 days'))
-                    ->withPath('/')
-                    ->withSecure(false)
-                    ->withHttpOnly(true)
-                    ->withSameSite('Strict');
+            $refreshTokenCookie = Cookie::create('REFRESH_TOKEN')
+                ->withValue($refreshToken->getRefreshToken())
+                ->withExpires(new \DateTime('+2 days'))
+                ->withPath('/')
+                ->withSecure(true)
+                ->withHttpOnly(true)
+                ->withSameSite('Strict');
 
-                $response = $this->json([
-                    'message' => 'Connexion réussie',
-                    'user' => [
-                        'id' => $user->getId(),
-                        'name' => $user->getName(),
-                        'email' => $user->getEmail(),
-                        'username' => $user->getUsername(),
-                        'role' => $user->getRole(),
-                        'isTwofactorEnabled' => $user->isTwoFactorEnabled()
+            $response = $this->json([
+                'message' => 'Connexion réussie',
+                'user' => [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'username' => $user->getUsername(),
+                    'isTwofactorEnabled' => $user->isTwoFactorEnabled()
 
-                    ]
-                ]);
+                ]
+            ]);
 
-                $response->headers->setCookie($jwtCookie);
-                $response->headers->setCookie($refreshTokenCookie);
+            $response->headers->setCookie($jwtCookie);
+            $response->headers->setCookie($refreshTokenCookie);
 
-                return $response;
+            return $response;
         } catch (\Exception $e) {
             $logger->error('Erreur lors de la connexion: ' . $e->getMessage());
             return $this->json([
@@ -277,7 +276,7 @@ class AuthController extends AbstractController
             //Si on passe le JWT via un cookie à voir
             $jwtCookie = Cookie::create('BEARER')
                 ->withValue($token)
-                ->withExpires(new \DateTime('+1 minutes'))
+                ->withExpires(new \DateTime('+1 hour'))
                 ->withPath('/')
                 ->withSecure(false)
                 ->withHttpOnly(true)
