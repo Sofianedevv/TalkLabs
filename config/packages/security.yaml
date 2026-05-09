@@ -2,28 +2,59 @@ security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Entity\Accounts:
+            algorithm: auto
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\Accounts
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        login:
+            pattern: ^/api/(login|register|test|test-token)
+            stateless: true
+            security: false
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            jwt: ~
+
         main:
             lazy: true
-            provider: users_in_memory
-
+            provider: app_user_provider
+            custom_authenticator: App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                target: app_login
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 week in seconds
+                path: /
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+            # Easy way to control access for large sections of your site
+            # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+      - { path: ^/api/login, roles: PUBLIC_ACCESS }
+      - { path: ^/api/register, roles: PUBLIC_ACCESS }
+      - { path: ^/api/categories, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversations/category, roles: PUBLIC_ACCESS }
+      - { path: ^/api/conversations/public, roles: PUBLIC_ACCESS }
+      - { path: ^/api/test, roles: PUBLIC_ACCESS }
+      - { path: ^/api/test-token, roles: PUBLIC_ACCESS }
+      - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+      - { path: ^/admin, roles: ROLE_ADMIN }
+      - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
     security:

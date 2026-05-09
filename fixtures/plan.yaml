@@ -1,0 +1,18 @@
+App\Entity\Plan:
+  plan_basic:
+    name: 'Basic Plan'
+    price: 9.99
+    description: 'Access to basic features'
+
+  plan_premium:
+    name: 'Premium Plan'
+    price: 19.99
+    description: 'Access to all features including premium support'
+
+App\Entity\Subscription:
+  subscription_1:
+    duration: 12
+    plan: '@plan_basic'
+    status: !php/const 'App\Enum\SubsciptionStatusEnum::ACTIVE'
+
+

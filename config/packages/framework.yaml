@@ -1,12 +1,22 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
-
+    http_client:
+        max_host_connections: 5
+        default_options:
+            verify_peer: false
+            max_redirects: 7
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 
+
     #esi: true
     #fragments: true
+
+    # Configuration pour gérer le contenu JSON
+    request:
+        formats:
+            json: ['application/json']
 
 when@test:
     framework:
